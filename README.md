@@ -1,6 +1,6 @@
-# timedoc README
+# Colaroid
 
-This is the README for your extension "timedoc". After writing up a brief description, we recommend including the following sections.
+Colaroid is designed for "literate programming" -- it allows you to embed code in a document to create computational narratives. It stands out from other computational notebooks as it is created for documenting code evolutions. Colaroid can be used for a variety of programming tasks where storytelling matters.
 
 ## Features
 

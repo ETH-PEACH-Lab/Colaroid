@@ -30,7 +30,7 @@ header {
 	z-index: 100;
     padding: 5px 10px;
     box-sizing: border-box;
-    width: 100%;
+    width: calc(100% - 40px);
 	min-width: 200px;
 	max-width: 980px;
 	margin: 0 auto;
@@ -39,7 +39,7 @@ header {
 	margin-top: 60px;
 }
 .code-cell {
-	width: 800px;
+	width: 600px;
 	height: 200px;
 	border: 1px solid #ccc;
 	margin: 0px 0px 10px 0px;
@@ -90,4 +90,13 @@ header {
 	.markdown-body {
 		padding: 15px;
 	}
+}
+
+.cell-wrapper {
+	margin-top: 10px;
+	padding: 5px;
+}
+
+iframe {
+	border: 1px solid #aaa;
 }

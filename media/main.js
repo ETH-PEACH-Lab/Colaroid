@@ -34,35 +34,41 @@
 		});
 	});
 	const updateDoc = (monaco, data) => {
-		let index = data.length - 1;
-		let ele = data[index];
-		let prevEle = data[index - 1];
-		generateMarkdown(monaco, ele, index);
-		const result = generateCodeEditor(monaco, ele, prevEle, index);
-		result.scrollIntoView();
+        console.log('update doc');
+        console.log(data);
+		let index = document.querySelectorAll('.cell-wrapper').length;
+        const cellWrapper = generateWrapper(index);
+		generateMarkdown(monaco, data, index, cellWrapper);
+		generateCodeEditor(monaco, data, index, cellWrapper);
+        generatePreview(data, index, cellWrapper);
+		cellWrapper.scrollIntoView();
 	};
 
 	const reviseDoc = (monaco, data) => {
 		notebookBox.removeChild(
 			notebookBox.childNodes[notebookBox.childNodes.length - 1]
 		);
-		notebookBox.removeChild(
-			notebookBox.childNodes[notebookBox.childNodes.length - 1]
-		);
 		let index = data.length - 1;
+        const cellWrapper = generateWrapper(index);
 		let ele = data[index];
 		let prevEle = data[index - 1];
-		generateMarkdown(monaco, ele, index);
-		const result = generateCodeEditor(monaco, ele, prevEle, index);
+		generateMarkdown(monaco, ele, index, cellWrapper);
+		const result = generateCodeEditor(monaco, ele, prevEle, index, cellWrapper);
+        generatePreview(ele, index, cellWrapper);
 		result.scrollIntoView();
 	};
 
-	const generateMarkdown = (monaco, data, index) => {
-		const text = data.message + "\n" + data.body;
+	const hideStart = () => {
+		const startContainer = document.querySelector('#start-container');
+		startContainer.style.display = 'none';
+	};
+
+	const generateMarkdown = (monaco, data, index, wrapper) => {
+		const text = data.message;
 		const markdownWrapper = document.createElement("div");
 		markdownWrapper.classList = "md-cell-wrapper";
-		markdownWrapper.id = "md-cell-wrapper-" + index.toString();
-		notebookBox.append(markdownWrapper);
+		markdownWrapper.id = `md-cell-wrapper-${index}`;
+		wrapper.append(markdownWrapper);
 
 		const markdownCell = document.createElement("div");
 		markdownCell.innerHTML = converter.makeHtml(text);
@@ -108,8 +114,9 @@
 			}
 		});
 	};
-	const generateCodeEditor = (monaco, data, prev, index) => {
+	const generateCodeEditor = (monaco, data, index, wrapper) => {
 		let language;
+		console.log(data);
 		switch (data.format) {
 			case "js":
 				language = "javascript";
@@ -129,28 +136,38 @@
 
 		const cellWrapper = document.createElement("div");
 		cellWrapper.classList = "code-cell-wrapper";
-		cellWrapper.id = "code-cell-wrapper-" + index.toString();
+		cellWrapper.id = `code-cell-wrapper-${index}`;
 		const codeCell = document.createElement("div");
 		codeCell.classList = "code-cell";
 		codeCell.id = "code-cell-" + index.toString();
-		notebookBox.append(cellWrapper);
+        codeCell.setAttribute('data', data.content);
+		wrapper.append(cellWrapper);
 		cellWrapper.append(codeCell);
 		const editor = monaco.editor.create(
-			document.getElementById("code-cell-" + index.toString()),
+			document.getElementById(`code-cell-${index}`),
 			{
 				value: data.content,
 				language,
 				readOnly: true,
 				theme: "vs-dark",
+				folding: true,
+				minimap: {
+					enabled: false
+				},
+				automaticLayout: true
 			}
 		);
 		codeEditorList.push(editor);
 		if (index > 0) {
+            const codeCells = document.querySelectorAll('.code-cell');
+            const lastCodeCell = codeCells[codeCells.length - 2];
+            const prevContent = lastCodeCell.getAttribute('data');
+            
 			const diffCell = document.createElement("div");
 			diffCell.classList = "diff-cell";
 			diffCell.id = "diff-cell-" + index.toString();
 			cellWrapper.append(diffCell);
-			codeCell.classList.toggle("hide");
+			diffCell.classList.toggle("hide");
 
 			const toggleButton = document.createElement("button");
 			toggleButton.classList = "toggle-button";
@@ -165,7 +182,7 @@
 			cellWrapper.append(toggleButton);
 
 			const originalModel = monaco.editor.createModel(
-				prev.content,
+				prevContent,
 				"text/" + language
 			);
 			const modifiedModel = monaco.editor.createModel(
@@ -187,13 +204,13 @@
 		return cellWrapper;
 	};
 
-	const generatePreview = (data, index) => {
+	const generatePreview = (data, index, wrapper) => {
 		const previewWrapper = document.createElement("div");
 		previewWrapper.classList = "preview-cell-wrapper";
-		previewWrapper.id = "preview-cell-wrapper-" + index.toString();
+		previewWrapper.id = `preview-cell-wrapper-${index}`;
 		const iframeEle = document.createElement("iframe");
 		previewWrapper.append(iframeEle);
-		notebookBox.append(previewWrapper);
+		wrapper.append(previewWrapper);
         // an interesting issue.. the string can't contain # if using data url. why??
 		// iframeEle.setAttribute("src", "data:text/html, " + string);
 		let iframedoc = iframeEle.document;
@@ -207,13 +224,43 @@
 		iframedoc.close();
 	};
 
+    const generateWrapper = (index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "cell-wrapper";
+        wrapper.id = `cell-wrapper-${index}`;
+        notebookBox.appendChild(wrapper); 
+        const cellIndex = document.createElement('span');
+        cellIndex.textContent = `[${index + 1}]`;
+        wrapper.appendChild(cellIndex);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete Cell';
+        deleteBtn.addEventListener("click", ()=>{
+            wrapper.parentNode.removeChild(wrapper);
+            vscode.postMessage({
+                command: "remove cell",
+                index,
+            });
+        });
+        wrapper.appendChild(deleteBtn);
+        // const moveUpBtn = document.createElement('button');
+        // moveUpBtn.textContent = 'Move Up';
+        // wrapper.appendChild(moveUpBtn);
+        // const moveDownBtn = document.createElement('button');
+        // moveDownBtn.textContent = 'Move Down';
+        // wrapper.appendChild(moveDownBtn);
+        // const displayBtn = document.createElement('button');
+        // displayBtn.textContent = 'Display in Editor';
+        // wrapper.appendChild(displayBtn);
+
+        return wrapper;
+    };
+
 	const generateDoc = (monaco, data) => {
-		let prevEle = null;
 		data.forEach((ele, index) => {
-			generateMarkdown(monaco, ele, index);
-			generateCodeEditor(monaco, ele, prevEle, index);
-			generatePreview(ele, index);
-			prevEle = ele;
+            const cellWrapper = generateWrapper(index);
+			generateMarkdown(monaco, ele, index, cellWrapper);
+			generateCodeEditor(monaco, ele, index, cellWrapper);
+			generatePreview(ele, index, cellWrapper);
 		});
 	};
 	const render = (data, command) => {
@@ -233,6 +280,7 @@
 						console.log("default");
 				}
 			}
+			hideStart();
 		};
 	};
 

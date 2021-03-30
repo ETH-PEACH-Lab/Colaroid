@@ -1,6 +1,6 @@
 {
-	"name": "timedoc",
-	"displayName": "timeDoc",
+	"name": "colaroid",
+	"displayName": "colaroid",
 	"description": "document code changes and create computational narratives",
 	"version": "0.0.1",
 	"engines": {
@@ -10,20 +10,15 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:timedoc.create"
+		"onCommand:colaroid.create"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "timedoc.create",
+				"command": "colaroid.create",
 				"title": "Create Notebook",
-				"category": "TimeDoc"
-			},
-			{
-				"command": "timedoc.snapshot",
-				"title": "Document Current Snapshot",
-				"category": "TimeDoc"
+				"category": "Colaroid"
 			}
 		]
 	},
