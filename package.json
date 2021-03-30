@@ -1,8 +1,10 @@
 {
 	"name": "colaroid",
-	"displayName": "colaroid",
-	"description": "document code changes and create computational narratives",
+	"displayName": "Colaroid",
+	"description": "Document code changes and create computational narratives",
+	"publisher":"LittleAprilFool",
 	"version": "0.0.1",
+	"repository": "https://github.com/LittleAprilFool/Colaroid",
 	"engines": {
 		"vscode": "^1.54.0"
 	},

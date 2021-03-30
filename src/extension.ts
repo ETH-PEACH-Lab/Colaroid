@@ -1,12 +1,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import { ColaroidPanel } from './colaroid';
+import * as vscode from "vscode";
+import { ColaroidPanel } from "./colaroid";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "colaroid" is now active!');
@@ -14,23 +13,22 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('colaroid.create', () => {
+	let disposable = vscode.commands.registerCommand("colaroid.create", () => {
 		// The code you place here will be executed every time your command is executed
 
 		let message: string;
-		if(vscode.workspace.workspaceFolders !== undefined) {
-			let path = vscode.workspace.workspaceFolders[0].uri.path ;
-			// let f = vscode.workspace.workspaceFolders[0].uri.fsPath ; 
-		
-			message = `YOUR-EXTENSION: folder: ${path}` ;
-		
+		if (vscode.workspace.workspaceFolders !== undefined) {
+			let path = vscode.workspace.workspaceFolders[0].uri.path;
+			// let f = vscode.workspace.workspaceFolders[0].uri.fsPath ;
+
+			message = `YOUR-EXTENSION: folder: ${path}`;
+
 			vscode.window.showInformationMessage(message);
 			ColaroidPanel.display(context.extensionUri, path);
+		} else {
+			message =
+				"YOUR-EXTENSION: Working folder not found, open a folder an try again";
 
-		} 
-		else {
-			message = "YOUR-EXTENSION: Working folder not found, open a folder an try again" ;
-		
 			vscode.window.showErrorMessage(message);
 		}
 	});

@@ -1,10 +1,10 @@
 #snapshot-input {
-	width: 100%;
-    display:block;
-    background-color: transparent;
-    color:#eee;
-    height: 40px;
-    border:2px solid #777;
+	width: calc(100% - 8px);
+	display: block;
+	background-color: transparent;
+	color: #eee;
+	height: 40px;
+	border: 2px solid #777;
 }
 
 button,
@@ -19,8 +19,8 @@ button:active {
 }
 
 #snapshot-btn {
-    background: transparent;
-    color: #4e94ce;
+	background: transparent;
+	color: #4e94ce;
 }
 header {
 	background: #333;
@@ -28,9 +28,9 @@ header {
 	top: 0px;
 	height: 80px;
 	z-index: 100;
-    padding: 5px 10px;
-    box-sizing: border-box;
-    width: calc(100% - 40px);
+	padding: 5px 10px;
+	box-sizing: border-box;
+	width: calc(100% - 40px);
 	min-width: 200px;
 	max-width: 980px;
 	margin: 0 auto;
@@ -39,21 +39,24 @@ header {
 	margin-top: 60px;
 }
 .code-cell {
-	width: 600px;
-	height: 200px;
 	border: 1px solid #ccc;
 	margin: 0px 0px 10px 0px;
 }
 .diff-cell {
-	width: 800px;
-	height: 200px;
 	border: 1px solid #ccc;
 	margin: 0px 0px 10px 0px;
 }
 
+.cell-wrapper:hover {
+	transition: all 0.5s ease-in-out;
+	background: #222;
+}
+
+.cell-wrapper:hover .wrapper-button {
+	background: #333;
+}
+
 .md-cell-editor {
-	width: 800px;
-	min-height: 80px;
 	border: 1px solid #ccc;
 	margin: 0px 0px 10px 0px;
 }
@@ -61,21 +64,49 @@ header {
 	display: none;
 }
 .toggle-button::after {
-    font-family: "Font Awesome 5 Free";
+	font-family: "Font Awesome 5 Free";
 	content: "\f126";
 }
 
 .toggle-button.isdiff::after {
-    font-family: "Font Awesome 5 Free";
+	font-family: "Font Awesome 5 Free";
 	content: "\f121";
 }
-.toggle-button{
-    border-radius: 4px;
-    padding: 5px;
-    width: 50px;
-    background: #333;
-    color: #ee9d28;
-    font-weight: 700;
+.wrapper-button {
+	border-radius: 4px;
+	padding: 5px;
+	width: 30px;
+	background: #222;
+	font-weight: 700;
+	margin-right: 5px;
+}
+.toggle-button {
+	color: #ee9d28;
+}
+.delete-button::after {
+	font-family: "Font Awesome 5 Free";
+	content: "\f2ed";
+}
+
+.delete-button {
+	color: #8f2d2d;
+}
+
+.moveup-button {
+	color: #4e94ce;
+}
+
+.moveup-button::after {
+	font-family: "Font Awesome 5 Free";
+	content: "\f062";
+}
+
+.movedown-button {
+	color: #4e94ce;
+}
+.movedown-button::after {
+	font-family: "Font Awesome 5 Free";
+	content: "\f063";
 }
 
 .markdown-body {
@@ -98,5 +129,6 @@ header {
 }
 
 iframe {
+	width: 100%;
 	border: 1px solid #aaa;
 }
