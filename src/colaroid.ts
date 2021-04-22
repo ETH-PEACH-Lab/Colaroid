@@ -83,7 +83,6 @@ export class ColaroidPanel {
 		// Handle messages from the webview
 		this._panel.webview.onDidReceiveMessage(
 			(message) => {
-				console.log(`get message ${message.content}`);
 				if (message.command === "add") {
 					createGitCommit(path, message.content).then((result) => {
 						const data = {
@@ -91,8 +90,6 @@ export class ColaroidPanel {
 							hash: result.commit,
 						};
 						this._content.push(data);
-						console.log("push");
-						console.log(this._content);
 						saveLocalDoc(this._path, this._content);
 						this._update(data);
 					});
@@ -136,7 +133,10 @@ export class ColaroidPanel {
 					);
 					saveLocalDoc(this._path, this._content);
 				}
-			},
+				if (message.command === "revert snapshot") {
+					revertGit(this._path, message.id);
+				}
+				},
 			null,
 			this._disposables
 		);
@@ -148,7 +148,7 @@ export class ColaroidPanel {
 		this._panel.webview.html = this._getHTMLForDoc(this._panel.webview);
 		for (const data of this._content) {
 			const { hash, message } = data;
-			const result = await retriveGitCommit(this._path, hash);
+			const result = await retrieveGitCommit(this._path, hash);
 			const content = { message, ...result };
 			this._panel.webview.postMessage({ command: "update", content });
 		}
@@ -157,7 +157,7 @@ export class ColaroidPanel {
 	private _update(data: any) {
 		// append the last cell
 		const { hash, message } = data;
-		retriveGitCommit(this._path, hash).then((result) => {
+		retrieveGitCommit(this._path, hash).then((result) => {
 			const content = { message, ...result };
 			this._panel.webview.postMessage({ command: "update", content });
 		});
@@ -188,6 +188,7 @@ export class ColaroidPanel {
 				<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" integrity="sha512-L03kznCrNOfVxOUovR6ESfCz9Gfny7gihUX/huVbQB9zjODtYpxaVtIaAkpetoiyV2eqWbvxMH9fiSv5enX7bw==" crossorigin="anonymous"></script>
 				<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.23.0/min/vs/loader.min.js" integrity="sha512-+8+MX2hyUZxaUfMJT0ew+rPsrTGiTmCg8oksa6uVE/ZlR/g3SJtyozqcqDGkw/W785xYAvcx1LxXPP+ywD0SNw==" crossorigin="anonymous"></script>
 				<link href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" rel="stylesheet">
+				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
 				<link href="${stylesMainUri}" rel="stylesheet">
                 <title>Colaroid</title>
             </head>
@@ -261,15 +262,18 @@ const isNewGit = async (dir: string): Promise<any> => {
 	const git: SimpleGit = simpleGit(options);
 	try {
 		const statusResult = await git.status();
+		await fs.writeFileSync(`${dir}/.gitignore`, '.colaroid');
 		console.log(statusResult);
 	} catch (error) {
 		const initResult = await git.init();
+		await fs.writeFileSync(`${dir}/.gitignore`, '.colaroid');
 		console.log("yeah!!");
 		console.log(initResult);
 	}
 	return false;
 };
-const retriveGitCommit = async (dir: string, hash: string): Promise<any> => {
+
+const revertGit = async (dir: string, hash: string): Promise<any> => {
 	const options: Partial<SimpleGitOptions> = {
 		baseDir: dir,
 		binary: "git",
@@ -279,48 +283,38 @@ const retriveGitCommit = async (dir: string, hash: string): Promise<any> => {
 	// when setting all options in a single object
 	const git: SimpleGit = simpleGit(options);
 
+	const revertResult = await git.reset(["--hard", hash]);
+	return true;
+};
+
+const retrieveGitCommit = async (dir: string, hash: string): Promise<any> => {
+	const options: Partial<SimpleGitOptions> = {
+		baseDir: dir,
+		binary: "git",
+		maxConcurrentProcesses: 6,
+	};
+	let result: any[] = [];
+
+	// when setting all options in a single object
+	const git: SimpleGit = simpleGit(options);
+	if(hash === '') {
+		return {hash, result};
+	} 
 	const hashResult = await git.catFile(["-p", hash]);
 	const treeMatch = hashResult.match(/tree (.*)/);
 	const treeID = treeMatch ? treeMatch[1] : "";
 	const treeResult = await git.catFile(["-p", treeID]);
-	const blobMatch = treeResult.match(/blob (.*)\t[^.]/);
-	const blobID = blobMatch ? blobMatch[1] : "";
-	const formatMatch = treeResult.match(/blob .*\t[^.].*\.(.*)/);
-	const format = formatMatch ? formatMatch[1] : "";
-	const content = await git.catFile(["-p", blobID]);
-	const result = { hash, content, format };
-	return result;
+	const titleMatch = [...treeResult.matchAll(/blob (.*)\t([^.].*)\.(.*)/g)];
+	for (let i = 0; i < titleMatch.length; i ++) {
+		let item = titleMatch[i];
+		let blobID = item[1];
+		let title = `${item[2]}.${item[3]}`;
+		let format = item[3];
+		let content = await git.catFile(["-p", blobID]);
+		result.push({ content, title, format });	
+	}
+	return {hash, result};
 };
-// const pullGitData = async (dir: string): Promise<any> => {
-// 	const result = [] as any[];
-// 	const options: Partial<SimpleGitOptions> = {
-// 		baseDir: dir,
-// 		binary: "git",
-// 		maxConcurrentProcesses: 6,
-// 	};
-
-// 	// when setting all options in a single object
-// 	const git: SimpleGit = simpleGit(options);
-
-// 	const logResult = await git.log();
-// 	const log = logResult.all;
-
-// 	for (let i = log.length - 1; i >= 0; i--) {
-// 		const { message, hash, body } = log[i];
-// 		const hashResult = await git.catFile(["-p", hash]);
-// 		const treeMatch = hashResult.match(/tree (.*)/);
-// 		const treeID = treeMatch ? treeMatch[1] : "";
-// 		const treeResult = await git.catFile(["-p", treeID]);
-// 		const blobMatch = treeResult.match(/blob (.*)\t[^.]/);
-// 		const blobID = blobMatch ? blobMatch[1] : "";
-// 		const formatMatch = treeResult.match(/\.(.*)\n/);
-// 		const format = formatMatch ? formatMatch[1] : "";
-// 		const content = await git.catFile(["-p", blobID]);
-// 		const element = { hash, message, content, format, body };
-// 		result.push(element);
-// 	}
-// 	return result;
-// };
 
 const createGitCommit = async (dir: string, message: string): Promise<any> => {
 	const options: Partial<SimpleGitOptions> = {
@@ -329,7 +323,10 @@ const createGitCommit = async (dir: string, message: string): Promise<any> => {
 		maxConcurrentProcesses: 6,
 	};
 	const git: SimpleGit = simpleGit(options);
+	console.log('before add');
 	const addResult = await git.add(["--all"]);
+	console.log(addResult);
 	const commitResult = await git.commit(message);
+	console.log(commitResult)
 	return commitResult;
 };

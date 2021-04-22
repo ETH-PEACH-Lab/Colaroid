@@ -1,3 +1,28 @@
+body{
+	background: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+	font: var(--vscode-editor-font-family);
+	font-size: var(--vscode-editor-font-size);
+	font-weight: var(--vscode-editor-font-weight);
+}
+
+h1{
+	font-size: calc(var(--vscode-editor-font-size) + 8px);
+}
+h2{
+	font-size: calc(var(--vscode-editor-font-size) + 6px);
+}
+h3{
+	font-size: calc(var(--vscode-editor-font-size) + 4px);
+}
+h4{
+	font-size: calc(var(--vscode-editor-font-size) + 2px);
+}
+
+.row{
+	margin: 0px;
+}
+
 #snapshot-input {
 	width: calc(100% - 8px);
 	display: block;
@@ -5,6 +30,35 @@
 	color: #eee;
 	height: 40px;
 	border: 2px solid #777;
+}
+
+.title-list-wrapper{
+	background: #222;
+	color: #eee;
+	font-size: 12px;
+	padding: 0px;
+}
+
+.title-list-title {
+	font-weight: bold;
+	padding: 4px 2px 4px 8px;
+}
+
+.title-list-wrapper ul {
+	list-style-type: none;
+	padding: 0px;
+}
+
+.title-list-wrapper li {
+	padding: 4px 2px 4px 8px;
+}
+
+.title-list-wrapper li:hover {
+	background:#333;
+}
+
+.title-list-wrapper .selected {
+	background: #444;
 }
 
 button,
@@ -38,13 +92,13 @@ header {
 #notebook-container {
 	margin-top: 60px;
 }
-.code-cell {
-	border: 1px solid #ccc;
-	margin: 0px 0px 10px 0px;
-}
-.diff-cell {
-	border: 1px solid #ccc;
-	margin: 0px 0px 10px 0px;
+
+/* .toolbar-wrapper {
+	display: none;
+} */
+
+.toolbar-wrapper {
+	margin-bottom: 5px;
 }
 
 .cell-wrapper:hover {
@@ -54,6 +108,16 @@ header {
 
 .cell-wrapper:hover .wrapper-button {
 	background: #333;
+}
+
+.cell-wrapper:hover .toolbar-wrapper {
+	display: block;
+	/* position: fixed;
+    top: 80px;
+    background:var(--vscode-editor-background);
+    width: 100%;
+    padding: 10px;
+    z-index: 1000; */
 }
 
 .md-cell-editor {
@@ -66,6 +130,11 @@ header {
 .toggle-button::after {
 	font-family: "Font Awesome 5 Free";
 	content: "\f126";
+}
+
+.revert-button::after {
+	font-family: "Font Awesome 5 Free";
+	content: "\f07c";	
 }
 
 .toggle-button.isdiff::after {
@@ -82,6 +151,9 @@ header {
 }
 .toggle-button {
 	color: #ee9d28;
+}
+.revert-button{
+	color: #55aa55;
 }
 .delete-button::after {
 	font-family: "Font Awesome 5 Free";
@@ -131,4 +203,7 @@ header {
 iframe {
 	width: 100%;
 	border: 1px solid #aaa;
+}
+.code-cell-wrapper {
+	border: 1px solid #ccc;
 }

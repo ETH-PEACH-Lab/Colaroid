@@ -112,9 +112,10 @@
 			keysPressed[event.key] = false;
 		});
 	};
-	const generateCodeEditor = (monaco, data, wrapper) => {
-		let language;
-		switch (data.format) {
+
+	const getLanguage = (format) =>{
+		let language = '';
+		switch (format) {
 			case "js":
 				language = "javascript";
 				break;
@@ -130,21 +131,43 @@
 			default:
 				language = "plain";
 		}
+		return language;
+	};
+
+	const generateCodeEditor = (monaco, data, wrapper) => {
+		if(data.hash==='') {
+			return;
+		} 
+		let language;
+		const result = data.result;
+		const item = result[0];
 
 		const cellWrapper = document.createElement("div");
 		cellWrapper.classList = "code-cell-wrapper";
+		const cellWrapperRow = document.createElement("div");
+		cellWrapperRow.classList = "row";
 		cellWrapper.id = `code-cell-wrapper-${data.hash}`;
 		const codeCell = document.createElement("div");
-		codeCell.classList = "code-cell";
+		codeCell.classList = "code-cell col-10";
 		codeCell.id = `code-cell-${data.hash}`;
-		codeCell.setAttribute("data", data.content);
+		codeCell.setAttribute("data", JSON.stringify(result));
 		wrapper.append(cellWrapper);
-		cellWrapper.append(codeCell);
+		cellWrapper.append(cellWrapperRow);
+		const fileListWrapper = document.createElement("div");
+		fileListWrapper.classList = "title-list-wrapper col-2";
+		const fileListTitle = document.createElement("div");
+		fileListTitle.innerHTML = '<div class="title-list-title">FILE LIST</div>';
+		fileListWrapper.appendChild(fileListTitle);
+		const fileListContainer = document.createElement("ul");
+		fileListWrapper.appendChild(fileListContainer);
+		
+		cellWrapperRow.append(fileListWrapper);
+		cellWrapperRow.append(codeCell);
 		const editor = monaco.editor.create(
 			document.getElementById(`code-cell-${data.hash}`),
 			{
-				value: data.content,
-				language,
+				value: item.content,
+				language: getLanguage(item.format),
 				readOnly: true,
 				theme: "vs-dark",
 				folding: true,
@@ -152,31 +175,34 @@
 					enabled: false,
 				},
 				automaticLayout: true,
+				renderOverviewRuler: false,
+				scrollBeyondLastLine: false
 			}
 		);
-		const contentHeight = editor.getModel().getLineCount() * 19;
-		codeCell.style.height = `${contentHeight}px`;
+		// const contentHeight = editor.getModel().getLineCount() * 19;
+		codeCell.style.height = `150px`;
 		codeEditorList.push(editor);
 
 		const isFirst = document.querySelectorAll(".code-cell").length < 2;
+		let prevContent = [];
+        
 		if (!isFirst) {
 			const codeCells = document.querySelectorAll(".code-cell");
 			const lastCodeCell = codeCells[codeCells.length - 2];
-			const prevContent = lastCodeCell.getAttribute("data");
-
+			prevContent = JSON.parse(lastCodeCell.getAttribute("data"));
 			const diffCell = document.createElement("div");
-			diffCell.classList = "diff-cell";
+			diffCell.classList = "diff-cell col-10";
 			diffCell.id = `diff-cell-${data.hash}`;
-			cellWrapper.append(diffCell);
-			diffCell.classList.toggle("hide");
+			cellWrapperRow.append(diffCell);
+			codeCell.classList.toggle("hide");
 
 			const originalModel = monaco.editor.createModel(
-				prevContent,
-				"text/" + language
+				prevContent[0].content,
+				"text/" + getLanguage(item.format)
 			);
 			const modifiedModel = monaco.editor.createModel(
-				data.content,
-				"text/" + language
+				item.content,
+				"text/" + getLanguage(item.format)
 			);
 
 			var diffEditor = monaco.editor.createDiffEditor(
@@ -188,23 +214,77 @@
 						enabled: false,
 					},
 					automaticLayout: true,
+					// Render the diff inline
+					renderSideBySide: false,
+					renderIndicators:false,
+					renderOverviewRuler: false,
+					scrollBeyondLastLine: false
 				}
 			);
 			diffEditor.setModel({
 				original: originalModel,
 				modified: modifiedModel,
 			});
-			let lastHeight = lastCodeCell.style.height;
-			lastHeight = parseInt(lastHeight.slice(0, lastHeight.length - 2));
-			const diffHeight =
-				lastHeight > contentHeight ? lastHeight : contentHeight;
-			diffCell.style.height = `${diffHeight}px`;
+			diffEditor.onDidUpdateDiff(() => {
+				const changes = diffEditor.getLineChanges();
+				if(changes.length > 0){					
+					const startNumber = changes[0].originalStartLineNumber;
+					diffEditor.revealLineNearTop(startNumber);
+				}
+			});
+			// let lastHeight = lastCodeCell.style.height;
+			// lastHeight = parseInt(lastHeight.slice(0, lastHeight.length - 2));
+			// const diffHeight =
+			// 	lastHeight > contentHeight ? lastHeight : contentHeight;
+			// diffCell.style.height = `${diffHeight}px`;
+			diffCell.style.height = `150px`;
 		}
+
+		result.forEach((i, idx) => {
+			const fileListItem = document.createElement("li");
+			fileListItem.innerText = i.title;
+			fileListContainer.appendChild(fileListItem);
+			if(idx === 0) {
+				fileListItem.classList = "selected";
+			}
+			fileListItem.addEventListener("click", () => {
+				const prevSelected = fileListContainer.querySelector('.selected');
+				prevSelected.classList.toggle('selected');
+				fileListItem.classList.toggle('selected');
+
+				const newModel = monaco.editor.createModel(
+					i.content,
+					"text/" + getLanguage(i.format)
+				);
+				editor.setModel(newModel);
+				if (!isFirst) {
+					// change the diff view
+					const originalModel = monaco.editor.createModel(
+						prevContent[idx].content,
+						"text/" + getLanguage(prevContent[idx].format)
+					);
+					const modifiedModel = monaco.editor.createModel(
+						i.content,
+						"text/" + getLanguage(i.format)
+					);
+					diffEditor.setModel({
+						original: originalModel,
+						modified: modifiedModel,
+					});
+				}
+			});
+		});
+
+		
 		return cellWrapper;
 	};
 
 	const generatePreview = (data, wrapper) => {
-		if (data.format === "html") {
+		if(data.hash==='') {
+			return;
+		} 
+		const item = data.result[0];
+		if (item.format === "html") {
 			const previewWrapper = document.createElement("div");
 			previewWrapper.classList = "preview-cell-wrapper";
 			previewWrapper.id = `preview-cell-wrapper-${data.hash}`;
@@ -220,7 +300,7 @@
 				iframedoc = iframeEle.contentWindow.document;
 			}
 			iframedoc.open();
-			iframedoc.writeln(data.content);
+			iframedoc.writeln(item.content);
 			iframedoc.close();
 		}
 	};
@@ -246,7 +326,7 @@
 		toolbarWrapper.appendChild(deleteBtn);
 		const toggleButton = document.createElement("button");
 		toggleButton.classList = "wrapper-button toggle-button";
-		toggleButton.classList.toggle("isdiff");
+		// toggleButton.classList.toggle("isdiff");
 
 		toggleButton.addEventListener("click", () => {
 			const codeCell = document.querySelector(`#code-cell-${data.hash}`);
@@ -292,7 +372,15 @@
 		// const displayBtn = document.createElement('button');
 		// displayBtn.textContent = 'Display in Editor';
 		// wrapper.appendChild(displayBtn);
-
+		const revertBtn = document.createElement("button");
+		revertBtn.classList = "wrapper-button revert-button";
+		revertBtn.addEventListener("click", () => {
+			vscode.postMessage({
+				command: "revert snapshot",
+				id: data.hash,
+			});
+		});
+		toolbarWrapper.appendChild(revertBtn);
 		return wrapper;
 	};
 
