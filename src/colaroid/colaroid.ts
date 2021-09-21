@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
+import * as path from 'path';
 import simpleGit, { SimpleGit, SimpleGitOptions } from "simple-git";
 
 export class ColaroidPanel {
@@ -179,51 +180,87 @@ export class ColaroidPanel {
 
 	private _getHTMLForDoc(webview: vscode.Webview) {
 		// Local path to main script run in the webview
+		// const scriptPathOnDisk = vscode.Uri.joinPath(
+		// 	this._extensionUri,
+		// 	"media",
+		// 	"main.js"
+		// );
 		const scriptPathOnDisk = vscode.Uri.joinPath(
 			this._extensionUri,
-			"media",
-			"main.js"
+			"dist",
+			"story.js"
 		);
 
 		// And the uri we use to load this script in the webview
 		const scriptUri = webview.asWebviewUri(scriptPathOnDisk);
+		const scriptUriBase = webview.asWebviewUri(
+			vscode.Uri.file(`${path.dirname(scriptPathOnDisk.fsPath)}/`)
+		);
+		// const stylesPathMainPath = vscode.Uri.joinPath(
+		// 	this._extensionUri,
+		// 	"media",
+		// 	"style.css"
+		// );
 		const stylesPathMainPath = vscode.Uri.joinPath(
 			this._extensionUri,
-			"media",
-			"style.css"
+			"dist/notebook",
+			"index.css"
 		);
 		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
+		// return `<!DOCTYPE html>
+        // <html lang="en">
+        //     <head>
+        //         <meta charset="utf-8" />
+		// 		<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" integrity="sha512-L03kznCrNOfVxOUovR6ESfCz9Gfny7gihUX/huVbQB9zjODtYpxaVtIaAkpetoiyV2eqWbvxMH9fiSv5enX7bw==" crossorigin="anonymous"></script>
+		// 		<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.23.0/min/vs/loader.min.js" integrity="sha512-+8+MX2hyUZxaUfMJT0ew+rPsrTGiTmCg8oksa6uVE/ZlR/g3SJtyozqcqDGkw/W785xYAvcx1LxXPP+ywD0SNw==" crossorigin="anonymous"></script>
+		// 		<link href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" rel="stylesheet">
+		// 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+		// 		<link href="${stylesMainUri}" rel="stylesheet">
+        //         <title>Colaroid</title>
+        //     </head>
+        //     <body>
+		// 	<header>
+		// 		<textarea placeholder="instructions here..." id="snapshot-input"></textarea>
+		// 		<button id="snapshot-btn"><i class="fa fa-plus"></i>
+		// 		Insert a Snapshot
+		// 		</button>
+		// 		<div id="toolbar-wrapper"></div>
+		// 	</header>
+        //         <article id="notebook-container" class="markdown-body">
+        //         </article>
+		// 		<article id="start-container">
+		// 		<h1>Welcome to Colaroid!</h1>
+		// 		<p>Colaroid is designed for "literate programming" -- it allows you to embed code in a document to create computational narratives. It stands out from other computational notebooks as it is created for documenting code evolutions. Colaroid can be used for a variety of programming tasks where storytelling matters. </p>
+		// 		<p>Please start by inserting a snapshot.</p>
+		// 		</article>
+        //         <script nonce="${nonce}" src="${scriptUri}"></script>
+        //     </body>
+        // </html>
+        // `;
 		return `<!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <meta charset="utf-8" />
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js" integrity="sha512-L03kznCrNOfVxOUovR6ESfCz9Gfny7gihUX/huVbQB9zjODtYpxaVtIaAkpetoiyV2eqWbvxMH9fiSv5enX7bw==" crossorigin="anonymous"></script>
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.23.0/min/vs/loader.min.js" integrity="sha512-+8+MX2hyUZxaUfMJT0ew+rPsrTGiTmCg8oksa6uVE/ZlR/g3SJtyozqcqDGkw/W785xYAvcx1LxXPP+ywD0SNw==" crossorigin="anonymous"></script>
-				<link href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" rel="stylesheet">
-				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
-				<link href="${stylesMainUri}" rel="stylesheet">
-                <title>Colaroid</title>
-            </head>
-            <body>
-			<header>
-				<textarea placeholder="instructions here..." id="snapshot-input"></textarea>
-				<button id="snapshot-btn"><i class="fa fa-plus"></i>
-				Insert a Snapshot
-				</button>
-				<div id="toolbar-wrapper"></div>
-			</header>
-                <article id="notebook-container" class="markdown-body">
-                </article>
-				<article id="start-container">
-				<h1>Welcome to Colaroid!</h1>
-				<p>Colaroid is designed for "literate programming" -- it allows you to embed code in a document to create computational narratives. It stands out from other computational notebooks as it is created for documenting code evolutions. Colaroid can be used for a variety of programming tasks where storytelling matters. </p>
-				<p>Please start by inserting a snapshot.</p>
-				</article>
-                <script nonce="${nonce}" src="${scriptUri}"></script>
-            </body>
-        </html>
+		<html lang="en">
+			<head>
+				<meta charset="utf-8" />
+				<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+				<title>Colaroid Notebook</title>
+				<base href="${scriptUriBase}" />
+				<link href="${stylesMainUri}" />
+			</head>
+			<body>
+				<div id="root"></div>
+				<script type="text/javascript">
+					function resolvePath(relativePath) {
+						if (relativePath && relativePath[0] == '.' && relativePath[1]!= '.') {
+							return '${scriptUriBase}' + relativePath.substring(1);
+						}
+						return '${scriptUriBase}' + relativePath;
+					}
+				</script>
+				<script type="text/javascript" src="${scriptUri}"></script>
+			</body>
+		</html>
         `;
 	}
 }

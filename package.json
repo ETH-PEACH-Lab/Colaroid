@@ -26,11 +26,13 @@
 	},
 	"scripts": {
 		"webpack-colaroid-watch": "webpack --config colaroid.config.js --mode development --watch",
+		"webpack-notebook-watch": "webpack --config notebook.config.js --mode development --watch",
+		"weboack-notebook": "weboack --config notebook.config.js --mode development",
 		"webpack-colaroid": "webpack --config colaroid.config.js --mode development",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
-		"watch": "npm-run-all -p webpack-colaroid-watch",
-		"build": "npm run webpack-colaroid",
+		"watch": "npm-run-all -p webpack-colaroid-watch webpack-notebook-watch",
+		"build": "npm run webpack-colaroid && npm run webpack-notebook",
 		"pretest": "npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
 		"test": "node ./out/test/runTest.js"
@@ -43,16 +45,22 @@
 		"@typescript-eslint/eslint-plugin": "^4.14.1",
 		"@typescript-eslint/parser": "^4.14.1",
 		"awesome-typescript-loader": "^5.2.1",
+		"copy-webpack-plugin": "^9.0.1",
 		"eslint": "^7.19.0",
 		"glob": "^7.1.6",
+		"html-webpack-plugin": "^5.3.2",
 		"mocha": "^8.2.1",
+		"npm-run-all": "^4.1.5",
+		"sass-loader": "^12.1.0",
+		"style-loader": "^3.3.0",
 		"typescript": "^3.9.9",
 		"vscode-test": "^1.5.0",
 		"webpack": "^5.53.0",
-		"webpack-cli": "^4.8.0",
-		"npm-run-all": "^4.1.5"
+		"webpack-cli": "^4.8.0"
 	},
 	"dependencies": {
+		"react": "^17.0.2",
+		"react-dom": "^17.0.2",
 		"simple-git": "^2.37.0"
 	}
 }
