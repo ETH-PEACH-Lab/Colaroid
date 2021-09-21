@@ -56,6 +56,7 @@ export class ColaroidPanel {
 		isNewGit(this._path);
 
 		readLocalDoc(this._path).then((data) => {
+			console.log(data)
 			this._content = data;
 			this._init();
 		});
@@ -85,7 +86,7 @@ export class ColaroidPanel {
 			(message) => {
 				if (message.command === "add") {
 					createGitCommit(path, message.content).then((result) => {
-						const data = {
+							const data = {
 							message: message.content,
 							hash: result.commit,
 						};
@@ -107,6 +108,7 @@ export class ColaroidPanel {
 					});
 					this._content.splice(index, 1);
 					saveLocalDoc(this._path, this._content);
+					this._refresh();
 				}
 
 				if (message.command === "move up cell") {
@@ -120,6 +122,7 @@ export class ColaroidPanel {
 						this._content[index - 1]
 					);
 					saveLocalDoc(this._path, this._content);
+					this._refresh();
 				}
 				if (message.command === "move down cell") {
 					const index = this._content.findIndex((item, idx) => {
@@ -132,6 +135,7 @@ export class ColaroidPanel {
 						this._content[index]
 					);
 					saveLocalDoc(this._path, this._content);
+					this._refresh();
 				}
 				if (message.command === "revert snapshot") {
 					revertGit(this._path, message.id);
@@ -154,13 +158,23 @@ export class ColaroidPanel {
 		}
 	}
 
-	private _update(data: any) {
+	private async _update(data: any) {
 		// append the last cell
 		const { hash, message } = data;
 		retrieveGitCommit(this._path, hash).then((result) => {
 			const content = { message, ...result };
 			this._panel.webview.postMessage({ command: "update", content });
 		});
+	}
+
+	private async _refresh(){
+		this._panel.webview.postMessage({ command: "clean", content: {}});
+		for (const data of this._content) {
+			const { hash, message } = data;
+			const result = await retrieveGitCommit(this._path, hash);
+			const content = { message, ...result };
+			this._panel.webview.postMessage({ command: "update", content });
+		}
 	}
 
 	private _getHTMLForDoc(webview: vscode.Webview) {
@@ -198,6 +212,7 @@ export class ColaroidPanel {
 				<button id="snapshot-btn"><i class="fa fa-plus"></i>
 				Insert a Snapshot
 				</button>
+				<div id="toolbar-wrapper"></div>
 			</header>
                 <article id="notebook-container" class="markdown-body">
                 </article>
@@ -323,10 +338,7 @@ const createGitCommit = async (dir: string, message: string): Promise<any> => {
 		maxConcurrentProcesses: 6,
 	};
 	const git: SimpleGit = simpleGit(options);
-	console.log('before add');
 	const addResult = await git.add(["--all"]);
-	console.log(addResult);
 	const commitResult = await git.commit(message);
-	console.log(commitResult)
 	return commitResult;
 };

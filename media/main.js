@@ -11,6 +11,43 @@
 	});
 	window.MonacoEnvironment = { getWorkerUrl: () => proxy };
 
+	const createToolBar = () => {
+		const toolbarWrapper = document.getElementById("toolbar-wrapper");
+		const deleteBtn = document.createElement("button");
+		deleteBtn.classList = "wrapper-button delete-button";
+		deleteBtn.addEventListener("click", () => {
+		});
+		toolbarWrapper.appendChild(deleteBtn);
+		const toggleButton = document.createElement("button");
+		toggleButton.classList = "wrapper-button toggle-button";
+		// toggleButton.classList.toggle("isdiff");
+
+		toggleButton.addEventListener("click", () => {
+		});
+
+		toolbarWrapper.appendChild(toggleButton);
+		const moveUpBtn = document.createElement("button");
+		moveUpBtn.classList = "wrapper-button moveup-button";
+		moveUpBtn.addEventListener("click", () => {
+		});
+		toolbarWrapper.appendChild(moveUpBtn);
+		const moveDownBtn = document.createElement("button");
+		moveDownBtn.classList = "wrapper-button movedown-button";
+		moveDownBtn.addEventListener("click", () => {
+		});
+		toolbarWrapper.appendChild(moveDownBtn);
+		// const displayBtn = document.createElement('button');
+		// displayBtn.textContent = 'Display in Editor';
+		// wrapper.appendChild(displayBtn);
+		const revertBtn = document.createElement("button");
+		revertBtn.classList = "wrapper-button revert-button";
+		revertBtn.addEventListener("click", () => {
+		});
+		toolbarWrapper.appendChild(revertBtn);
+	};
+
+	createToolBar();
+
 	let proxy = URL.createObjectURL(
 		new Blob(
 			[
@@ -40,6 +77,12 @@
 		generateCodeEditor(monaco, data, cellWrapper);
 		generatePreview(data, cellWrapper);
 		cellWrapper.scrollIntoView();
+	};
+
+	const cleanDoc = () => {
+		while(notebookBox.childElementCount > 0) {
+			notebookBox.removeChild(notebookBox.firstChild);
+		}	
 	};
 
 	const hideStart = () => {
@@ -390,6 +433,9 @@
 				switch (command) {
 					case "update":
 						updateDoc(monaco, data);
+						break;
+					case "clean":
+						cleanDoc();
 						break;
 					default:
 						console.log("default");
