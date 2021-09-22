@@ -57,7 +57,7 @@ export class ColaroidPanel {
 		isNewGit(this._path);
 
 		readLocalDoc(this._path).then((data) => {
-			console.log(data)
+			console.log(data);
 			this._content = data;
 			this._init();
 		});
@@ -188,7 +188,7 @@ export class ColaroidPanel {
 		const scriptPathOnDisk = vscode.Uri.joinPath(
 			this._extensionUri,
 			"dist",
-			"story.js"
+			"notebook.js"
 		);
 
 		// And the uri we use to load this script in the webview
@@ -206,7 +206,11 @@ export class ColaroidPanel {
 			"dist/notebook",
 			"index.css"
 		);
+		console.log(scriptUri);
+		console.log(scriptUriBase);
 		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
+
+		console.log(stylesMainUri);
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 		// return `<!DOCTYPE html>
@@ -250,6 +254,7 @@ export class ColaroidPanel {
 			</head>
 			<body>
 				<div id="root"></div>
+				<h1>Test</h1>
 				<script type="text/javascript">
 					function resolvePath(relativePath) {
 						if (relativePath && relativePath[0] == '.' && relativePath[1]!= '.') {
