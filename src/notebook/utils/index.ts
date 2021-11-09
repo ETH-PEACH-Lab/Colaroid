@@ -1,0 +1,1 @@
+export const vscode = (global as any).acquireVsCodeApi();

@@ -9,7 +9,7 @@
 	require.config({
 		paths: { vs: "https://unpkg.com/monaco-editor@latest/min/vs" },
 	});
-	window.MonacoEnvironment = { getWorkerUrl: () => proxy };
+	window.MonacoEnvironment = { g4etWorkerUrl: () => proxy };
 
 	const createToolBar = () => {
 		const toolbarWrapper = document.getElementById("toolbar-wrapper");

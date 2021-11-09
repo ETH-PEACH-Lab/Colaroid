@@ -1,3 +1,240 @@
-body {
-    background-color: aqua;
+body{
+	background: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+	font: var(--vscode-editor-font-family);
+	font-size: var(--vscode-editor-font-size);
+	font-weight: var(--vscode-editor-font-weight);
+}
+
+h1{
+	font-size: calc(var(--vscode-editor-font-size) + 8px);
+}
+h2{
+	font-size: calc(var(--vscode-editor-font-size) + 6px);
+}
+h3{
+	font-size: calc(var(--vscode-editor-font-size) + 4px);
+}
+h4{
+	font-size: calc(var(--vscode-editor-font-size) + 2px);
+}
+
+.row{
+	margin: 0px;
+}
+
+#snapshot-input {
+	width: calc(100% - 8px);
+	display: block;
+	background-color: transparent;
+	color: #eee;
+	height: 40px;
+	border: 2px solid #777;
+}
+
+.title-list-wrapper{
+	background: #222;
+	color: #eee;
+	font-size: 12px;
+	padding: 0px;
+}
+
+.title-list-title {
+	font-weight: bold;
+	padding: 4px 2px 4px 8px;
+}
+
+.title-list-wrapper ul {
+	list-style-type: none;
+	padding: 0px;
+}
+
+.title-list-wrapper li {
+	padding: 4px 2px 4px 8px;
+}
+
+.title-list-wrapper li:hover {
+	background:#333;
+}
+
+.title-list-wrapper .selected {
+	background: #444;
+}
+
+button,
+button:focus {
+	outline: none;
+	border: 1px solid transparent;
+}
+
+button:active {
+	outline: none;
+	border: 1px solid grey;
+}
+
+#snapshot-btn {
+	background: transparent;
+	color: #4e94ce;
+}
+header {
+	background: #333;
+	position: fixed;
+	top: 0px;
+	height: 100px;
+	z-index: 100;
+	padding: 5px 10px;
+	box-sizing: border-box;
+	width: calc(100% - 40px);
+	min-width: 200px;
+	max-width: 980px;
+	margin: 0 auto;
+}
+.toolbar-wrapper {
+	margin-top: 5px;
+}
+#notebook-container {
+	margin-top: 80px;
+}
+
+/* .toolbar-wrapper {
+	display: none;
+} */
+
+#toolbar-wrapper {
+	margin-bottom: 5px;
+}
+
+.cell-wrapper:hover {
+	transition: all 0.5s ease-in-out;
+	background: #222;
+}
+
+.cell-wrapper:hover .wrapper-button {
+	background: #333;
+}
+
+.cell-wrapper:hover .toolbar-wrapper {
+	display: block;
+	/* position: fixed;
+    top: 80px;
+    background:var(--vscode-editor-background);
+    width: 100%;
+    padding: 10px;
+    z-index: 1000; */
+}
+
+.md-cell-editor {
+	border: 1px solid #ccc;
+	margin: 0px 0px 10px 0px;
+}
+.hide {
+	display: none;
+}
+
+.toggle-button::after{
+	content: "View Diff"
+}
+.toggle-button::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f126";
+	font-weight: 700;
+}
+.revert-button::after{
+	content: "Open"
+}
+.revert-button::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f07c";	
+	font-weight: 700;
+}
+.toggle-button.isdiff::after{
+	content: "View Code"
+}
+.toggle-button.isdiff::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f121";
+	font-weight: 700;
+}
+.wrapper-button {
+	border-radius: 4px;
+	padding: 5px;
+	width: 70px;
+	background: #444;
+	margin-right: 5px;
+}
+
+.wrapper-button::after {
+	font-size:8px;
+	margin-left:5px;
+}
+.toggle-button {
+	color: #ee9d28;
+}
+.revert-button{
+	color: #55aa55;
+}
+.delete-button::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f2ed";
+	font-weight: 700;
+}
+
+.delete-button::after{
+	content: "Delete"
+}
+
+.delete-button {
+	color: #8f2d2d;
+}
+
+.moveup-button {
+	color: #4e94ce;
+}
+.moveup-button::after{
+	content: "Move Up"
+}
+
+.moveup-button::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f062";
+	font-weight: 700;
+}
+
+.movedown-button {
+	color: #4e94ce;
+}
+.movedown-button::after{
+	content: "Move Down"
+}
+.movedown-button::before {
+	font-family: "Font Awesome 5 Free";
+	content: "\f063";
+	font-weight: 700;
+}
+
+.markdown-body {
+	box-sizing: border-box;
+	min-width: 200px;
+	max-width: 980px;
+	margin: 0 auto;
+	padding: 45px;
+}
+
+@media (max-width: 767px) {
+	.markdown-body {
+		padding: 15px;
+	}
+}
+
+.cell-wrapper {
+	margin-top: 10px;
+	padding: 5px;
+}
+
+iframe {
+	width: 100%;
+	border: 1px solid #aaa;
+}
+.code-cell-wrapper {
+	border: 1px solid #ccc;
 }
