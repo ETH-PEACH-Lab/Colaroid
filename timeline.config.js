@@ -1,25 +1,23 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
-    entry: './notebook/index.tsx',
+    entry: './timeline/index.tsx',
     mode: 'development',
     plugins: [
         new HtmlWebpackPlugin({
-            template: './notebook/index.html',
+            template: './timeline/index.html',
             imageBaseUrl: `${__dirname.replace(/\\/g, '/')}/dist`,
             indexUrl: `${__dirname}/out/1`,
-            filename: './notebook/index.html',
+            filename: './timeline/index.html',
         }),
         new CopyWebpackPlugin({
             patterns: [
                 { from: './**/*.css', to: '.'},
             ],
-        }),
-        new MonacoWebpackPlugin()
+        })
     ],
     devtool: 'eval-source-map',
     externals: {
@@ -52,6 +50,6 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'notebook.js',
+        filename: 'timeline.js',
     },
 };

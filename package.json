@@ -12,7 +12,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:colaroid.create"
+		"onCommand:colaroid.create",
+		"onCommand:colaroid.timeline"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -21,18 +22,25 @@
 				"command": "colaroid.create",
 				"title": "Create Notebook",
 				"category": "Colaroid"
+			},
+			{
+				"command": "colaroid.timeline",
+				"title": "Timeline View",
+				"category": "Colaroid"
 			}
 		]
 	},
 	"scripts": {
 		"webpack-colaroid-watch": "webpack --config colaroid.config.js --mode development --watch",
 		"webpack-notebook-watch": "webpack --config notebook.config.js --mode development --watch",
+		"webpack-timeline-watch": "webpack --config timeline.config.js --mode development --watch",
 		"webpack-notebook": "webpack --config notebook.config.js --mode development",
 		"webpack-colaroid": "webpack --config colaroid.config.js --mode development",
+		"webpack-timeline": "webpack --config timeline.config.js --mode development",
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
-		"watch": "npm-run-all -p webpack-colaroid-watch webpack-notebook-watch",
-		"build": "npm run webpack-colaroid && npm run webpack-notebook",
+		"watch": "npm-run-all -p webpack-colaroid-watch webpack-notebook-watch webpack-timeline-watch",
+		"build": "npm run webpack-colaroid && npm run webpack-notebook && npm run webpack-timeline",
 		"pretest": "npm run compile && npm run lint",
 		"lint": "eslint src --ext ts",
 		"test": "node ./out/test/runTest.js"
@@ -61,11 +69,14 @@
 	},
 	"dependencies": {
 		"@reduxjs/toolkit": "^1.6.2",
+		"@vscode/codicons": "^0.0.26",
 		"bootstrap": "^5.1.3",
 		"monaco-editor-webpack-plugin": "^6.0.0",
+		"parse-git-diff": "^0.0.6",
 		"react": "^17.0.2",
 		"react-bootstrap": "^2.0.1",
 		"react-dom": "^17.0.2",
+		"react-iframe": "^1.8.0",
 		"react-monaco-editor": "^0.43.0",
 		"react-redux": "^7.2.6",
 		"react-showdown": "^2.3.1",

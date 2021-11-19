@@ -1,9 +1,12 @@
+:root {
+	--cellbg: #252526;
+	--btncolor: rgb(197,197,197);
+}
 body{
 	background: var(--vscode-editor-background);
 	color: var(--vscode-editor-foreground);
-	font: var(--vscode-editor-font-family);
-	font-size: var(--vscode-editor-font-size);
-	font-weight: var(--vscode-editor-font-weight);
+	font-size: var(--vscode-editor-font-size)!important;
+	font-weight: var(--vscode-editor-font-weight)!important;
 }
 
 h1{
@@ -26,10 +29,10 @@ h4{
 #snapshot-input {
 	width: calc(100% - 8px);
 	display: block;
-	background-color: transparent;
+	background-color: var(--cellbg);
 	color: #eee;
 	height: 40px;
-	border: 2px solid #777;
+	outline: solid 1px #37373d;
 }
 
 .title-list-wrapper{
@@ -75,6 +78,8 @@ button:active {
 #snapshot-btn {
 	background: transparent;
 	color: #4e94ce;
+	margin-top: 4px;
+	display: flex;
 }
 header {
 	background: #333;
@@ -91,6 +96,13 @@ header {
 }
 .toolbar-wrapper {
 	margin-top: 5px;
+	display:inline-flex;
+	list-style-type: none;
+	margin-bottom: 5px;
+	background-color: rgb(30, 30, 30);
+	border: 1px solid rgba(128,128,128,0.35);
+	padding-left:0px;
+	float:right;
 }
 #notebook-container {
 	margin-top: 80px;
@@ -100,28 +112,23 @@ header {
 	display: none;
 } */
 
-#toolbar-wrapper {
-	margin-bottom: 5px;
-}
-
 .cell-wrapper:hover {
-	transition: all 0.5s ease-in-out;
 	background: #222;
 }
 
-.cell-wrapper:hover .wrapper-button {
-	background: #333;
+.wrapper-button:hover {
+	background: rgba(90, 93, 94, 0.31);
 }
 
-.cell-wrapper:hover .toolbar-wrapper {
+/* .cell-wrapper:hover .toolbar-wrapper {
 	display: block;
-	/* position: fixed;
+	position: fixed;
     top: 80px;
     background:var(--vscode-editor-background);
     width: 100%;
     padding: 10px;
-    z-index: 1000; */
-}
+    z-index: 1000;
+} */
 
 .md-cell-editor {
 	border: 1px solid #ccc;
@@ -131,85 +138,89 @@ header {
 	display: none;
 }
 
-.toggle-button::after{
+/* .toggle-button::after{
 	content: "View Diff"
-}
+} */
 .toggle-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f126";
 	font-weight: 700;
 }
-.revert-button::after{
+/* .revert-button::after{
 	content: "Open"
-}
+} */
 .revert-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f07c";	
-	font-weight: 700;
+	font-weight: 400;
 }
-.toggle-button.isdiff::after{
+/* .toggle-button.isdiff::after{
 	content: "View Code"
-}
+} */
 .toggle-button.isdiff::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f121";
 	font-weight: 700;
 }
 .wrapper-button {
-	border-radius: 4px;
-	padding: 5px;
-	width: 70px;
-	background: #444;
-	margin-right: 5px;
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	border-radius: 5px;
+	width: 16px;
+	height: 16px;
+	margin: 5px;
+}
+
+.wrapper-button::before {
+	font-weight: 600;
+	font-size: 10px;
+	text-align: center;
 }
 
 .wrapper-button::after {
-	font-size:8px;
-	margin-left:5px;
+	font-size:16px;
 }
 .toggle-button {
-	color: #ee9d28;
+	color:var(--btncolor);
 }
 .revert-button{
-	color: #55aa55;
+	color:var(--btncolor);
 }
 .delete-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f2ed";
-	font-weight: 700;
 }
 
-.delete-button::after{
+/* .delete-button::after{
 	content: "Delete"
-}
+} */
 
 .delete-button {
-	color: #8f2d2d;
+	color: var(--btncolor);
 }
 
 .moveup-button {
-	color: #4e94ce;
+	color:var(--btncolor);
 }
-.moveup-button::after{
+/* .moveup-button::after{
 	content: "Move Up"
-}
+} */
 
 .moveup-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f062";
-	font-weight: 700;
 }
 
 .movedown-button {
-	color: #4e94ce;
+	color:var(--btncolor);
 }
-.movedown-button::after{
+/* .movedown-button::after{
 	content: "Move Down"
-}
+} */
 .movedown-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f063";
-	font-weight: 700;
 }
 
 .markdown-body {
@@ -229,12 +240,29 @@ header {
 .cell-wrapper {
 	margin-top: 10px;
 	padding: 5px;
+	border-left:3px solid #222;
+}
+.cell-wrapper:focus-within{
+	border-left:3px solid rgb(0, 127, 212);
 }
 
 iframe {
 	width: 100%;
-	border: 1px solid #aaa;
+	border: 1px solid #37373d;
 }
 .code-cell-wrapper {
-	border: 1px solid #ccc;
+	outline: solid 1px #37373d;
+}
+
+.code-cell-wrapper:focus-within {
+	outline: solid 1px rgb(0, 127, 212);
+}
+
+.md-cell-preview {
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+#dropdown-item-button{
+	font-size: 10px;
 }

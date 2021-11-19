@@ -8,12 +8,13 @@ export function InputBox() {
 		vscode.postMessage({
 			content,
 			command: "add",
-		}); 
+		});
+        inputRef.current!.value = ''; 
     };
     return <div>
         <textarea placeholder="instructions here..." id="snapshot-input" ref={inputRef}></textarea>
-        <button id="snapshot-btn" onClick={createSnapshot}><i className="fa fa-plus"></i>
-            Insert a Snapshot
+        <button id="snapshot-btn" onClick={createSnapshot}>
+            <i className="codicon codicon-pencil"></i>  Insert a Snapshot
         </button>
         <div id="toolbar-wrapper"></div>
     </div>;

@@ -6,7 +6,7 @@ export function Notebook() {
     const content = useAppSelector(selectContent);
     return <div>
         {content.map((cell, index) => 
-        <Cell content={cell} key={index}/>
+        <Cell content={cell} index={index} key={index}/>
         )}
     </div>;
 }

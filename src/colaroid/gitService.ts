@@ -56,4 +56,10 @@ export class GitService {
         const revertResult = await this.git.reset(["--hard", hash]);
         return true;
     };
+
+    public generateDiff = async(hashA: string, hashB: string, file: string): Promise<any> => {
+        const summary = await this.git.diffSummary([hashA, hashB, file]);
+        const result = await this.git.diff([hashA, hashB, file]);
+        return result;
+    };
 }

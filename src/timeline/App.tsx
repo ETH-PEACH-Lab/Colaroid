@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { InputBox } from './features/inputbox/InputBox';
-import { Instruction } from './features/instruction/Instruction';
+import { useAppDispatch } from './app/hooks';
 import { Notebook } from './features/notebook/Notebook';
 import { appendContent } from './features/notebook/notebookSlice';
 import { vscode } from './utils';
 export function App() {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     // using the useEffect hock to set Event Listener
     useEffect(() => {
         // send message back
@@ -29,10 +27,7 @@ export function App() {
         }; // run code when the component unmounts
     }, []);
 
-
     return <div>
-        <InputBox />
-        <Instruction />
         <Notebook />
     </div>;
 }

@@ -1,12 +1,12 @@
 import * as React from 'react';
-import MonacoEditor, { EditorConstructionOptions, MonacoDiffEditor } from 'react-monaco-editor';
+import MonacoEditor, { EditorConstructionOptions, monaco, MonacoDiffEditor } from 'react-monaco-editor';
 import { CellProps } from "./Cell";
 import { Row, Col, Container } from 'react-bootstrap';
 import { getLanguage } from '../../utils';
 import { useAppSelector } from '../../app/hooks';
 import { selectContent } from './notebookSlice';
 
-export function CellCodeEditor(props: CellProps) {
+export function CellCodeEditorV3(props: CellProps) {
     const [currentFileIndex, setCurrentFileIndex] = React.useState(0);
     const content = useAppSelector(selectContent);
 
@@ -38,13 +38,49 @@ export function CellCodeEditor(props: CellProps) {
         return match;
     };
 
-    const editorDidMount = (editor) => {
+    const editorDidMount = (editor, monaco) => {
         editor.onDidUpdateDiff(() => {
             const changes = editor.getLineChanges();
-				if(changes.length > 0){					
-					const startNumber = changes[0].originalStartLineNumber;
-					editor.revealLineNearTop(startNumber);
-				}
+            console.log(changes);
+            let oPrevLine = 2;
+            let mPrevLine = 2;
+            let originalHiddenArea = [] as any;
+            let modifiedHiddenArea = [] as any;
+            changes.forEach(change => {
+                let oChangeStart;
+                let mChangeStart;
+                // if add lines
+                if(change.originalEndLineNumber === 0) {
+                    oChangeStart = change.originalStartLineNumber - 1;
+                    mChangeStart = change.modifiedStartLineNumber - 2;
+                    if(oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
+                    if(mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
+                    oPrevLine = change.originalStartLineNumber + 2;
+                    mPrevLine = change.modifiedEndLineNumber + 2;
+                }
+
+                // if delete lines
+                if(change.modifiedEndLineNumber === 0) {
+                    oChangeStart = change.originalStartLineNumber - 2;
+                    mChangeStart = change.modifiedStartLineNumber - 1;
+                    if(oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
+                    if(mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
+                    oPrevLine = change.originalEndLineNumber + 2;
+                    mPrevLine = change.modifiedStartLineNumber + 2;
+                }
+
+                // if modify lines
+                if(change.originalEndLineNumber != 0 && change.modifiedEndLineNumber != 0) {
+                    oChangeStart = change.originalStartLineNumber - 1;
+                    mChangeStart = change.modifiedStartLineNumber - 1;
+                    if(oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
+                    if(mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
+                    oPrevLine = change.originalEndLineNumber + 2;
+                    mPrevLine = change.modifiedEndLineNumber + 2;
+                }
+            });
+            editor.getOriginalEditor().setHiddenAreas(originalHiddenArea); 
+            editor.getModifiedEditor().setHiddenAreas(modifiedHiddenArea); 
         });
     };
 

@@ -1,19 +1,14 @@
 import * as vscode from "vscode";
-import * as fs from "fs";
 import * as path from "path";
-import simpleGit, { SimpleGit, SimpleGitOptions } from "simple-git";
 import { GitService } from "./gitService";
+import { getNonce, getWebviewOptions, readLocalDoc, saveLocalDoc } from "./utils";
 
-const delay = (ms) => {
-	return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-export class ColaroidPanel {
+export class ColaroidNotebookPanel {
 	/**
 	 * Track the currently panel. Only allow a single panel to exist at a time.
 	 */
 
-	public static currentPanel: ColaroidPanel | undefined;
+	public static currentPanel: ColaroidNotebookPanel | undefined;
 	public static readonly viewType = "colaroid";
 
 	private readonly panel: vscode.WebviewPanel;
@@ -21,30 +16,24 @@ export class ColaroidPanel {
 	private readonly path: string;
 	private gitService;
 	private content: any[] = [];
-	private currentVisible: boolean = true;
-	private currentViewColumn: any = vscode.ViewColumn.One;
 	private disposables: vscode.Disposable[] = [];
 
 	public static display(extensionUri: vscode.Uri, path: string) {
-		const column = vscode.window.activeTextEditor
-			? vscode.window.activeTextEditor.viewColumn
-			: undefined;
-
 		// If we already have a panel, show it
-		if (ColaroidPanel.currentPanel) {
-			ColaroidPanel.currentPanel.panel.reveal(column);
+		if (ColaroidNotebookPanel.currentPanel) {
+			ColaroidNotebookPanel.currentPanel.panel.reveal(vscode.ViewColumn.Two);
 			return;
 		}
 
 		//Otherwise, create a new panel.
 		const panel = vscode.window.createWebviewPanel(
-			ColaroidPanel.viewType,
+			ColaroidNotebookPanel.viewType,
 			"Colaroid",
-			column || vscode.ViewColumn.One,
+			vscode.ViewColumn.Two,
 			getWebviewOptions(extensionUri)
 		);
 
-		ColaroidPanel.currentPanel = new ColaroidPanel(
+		ColaroidNotebookPanel.currentPanel = new ColaroidNotebookPanel(
 			panel,
 			extensionUri,
 			path
@@ -68,23 +57,10 @@ export class ColaroidPanel {
 
 		// Listen for when the panel is disposed
 		// This happens when the user closes the panel
-		// this.panel.onDidDispose(()=>this.disposables())
-
-		// Update the content based on view changes
-		this.panel.onDidChangeViewState(
-			(e) => {
-				if (this.panel.visible && !this.currentVisible) {
-					this.init();
-				}
-				if (this.panel.viewColumn !== this.currentViewColumn) {
-					this.init();
-				}
-				this.currentVisible = this.panel.visible;
-				this.currentViewColumn = this.panel.viewColumn;
-			},
-			null,
-			this.disposables
-		);
+		this.panel.onDidDispose(()=>{
+			this.disposables;
+			ColaroidNotebookPanel.currentPanel = undefined;
+		});
 
 		// Handle messages from the webview
 		this.panel.webview.onDidReceiveMessage(
@@ -98,9 +74,9 @@ export class ColaroidPanel {
 		// init the notebook
 		this.panel.title = "New Notebook";
 		this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
-		// need to wait sometime to load react component;
-		// TODO: send a signal from frontend to backend, indicating that the frontend is ready
-		await delay(5000);
+	}
+
+	private async initMessage(){
 		for (const data of this.content) {
 			const { hash, message } = data;
 			const result = await this.gitService.retrieveGitCommit(hash);
@@ -138,12 +114,8 @@ export class ColaroidPanel {
 		const uriBase = webview.asWebviewUri(
 			vscode.Uri.file(`${path.dirname(scriptPathOnDisk.fsPath)}/`)
 		);
+		const codiconsUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.extensionUri.path, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')));
 
-		const stylesPathMainPath = vscode.Uri.file(
-			path.join(this.extensionUri.path, "dist/notebook", "index.css")
-		);
-
-		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
@@ -155,12 +127,11 @@ export class ColaroidPanel {
 				<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 				<title>Colaroid Notebook</title>
 				<base href="${uriBase}">
-				<link href="${stylesMainUri}" rel="stylesheet" />
+				<link href="${codiconsUri}" rel="stylesheet" />
 				<link href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" rel="stylesheet">
 			</head>
 			<body>
 				<div id="root"></div>
-				<h1>Test</h1>
 				<script type="text/javascript">
 					function resolvePath(relativePath) {
 						if (relativePath && relativePath[0] == '.' && relativePath[1]!== '.') {
@@ -176,8 +147,9 @@ export class ColaroidPanel {
 	}
 
 	private handleMessage(message) {
-		console.log('got message');
-		console.log(message.command)
+		if (message.command === "ready") {
+			this.initMessage();
+		}
 		if (message.command === "add") {
 			this.gitService.createGitCommit(message.content).then((result) => {
 				const data = {
@@ -216,7 +188,6 @@ export class ColaroidPanel {
 				this.content[index - 1]
 			);
 			saveLocalDoc(this.path, this.content);
-			this.refresh();
 		}
 		if (message.command === "move down cell") {
 			const index = this.content.findIndex((item, idx) => {
@@ -229,52 +200,14 @@ export class ColaroidPanel {
 				this.content[index]
 			);
 			saveLocalDoc(this.path, this.content);
-			this.refresh();
-		}
+			}
 		if (message.command === "revert snapshot") {
 			this.gitService.revertGit(message.id);
 		}
 	}
 }
 
-function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
-	return {
-		// Enable javascript in the webview
-		enableScripts: true,
 
-		// And restrict the webview to only loading content from our extension's `media` directory.
-		localResourceRoots: [
-			vscode.Uri.file(path.join(extensionUri.path, "media")),
-			vscode.Uri.file(path.join(extensionUri.path, "dist")),
-		],
-	};
-}
 
-function getNonce() {
-	let text = "";
-	const possible =
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	for (let i = 0; i < 32; i++) {
-		text += possible.charAt(Math.floor(Math.random() * possible.length));
-	}
-	return text;
-}
 
-const readLocalDoc = async (dir: string): Promise<any> => {
-	return new Promise((resolve, reject) => {
-		// check if .colaroid exists
-		fs.readFile(`${dir}/.colaroid`, "utf8", (err, data) => {
-			if (err) {
-				resolve([]);
-			} else {
-				// parse JSON string to JSON object
-				const doc = JSON.parse(data);
-				resolve(doc);
-			}
-		});
-	});
-};
 
-const saveLocalDoc = async (dir: string, data: any): Promise<any> => {
-	fs.writeFileSync(`${dir}/.colaroid`, JSON.stringify(data));
-};
