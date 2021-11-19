@@ -1,0 +1,21 @@
+body{
+	background: var(--vscode-editor-background);
+	color: var(--vscode-editor-foreground);
+	font-size: var(--vscode-editor-font-size)!important;
+	font-weight: var(--vscode-editor-font-weight)!important;
+}
+
+.page-link{
+	background-color: #252526;
+	border-color: #37373c;
+	color: #949494;
+}
+
+.page-link:hover {
+	background-color: rgba(90, 93, 94, 0.31);
+	border-color: #37373c;
+}
+
+.notebook-wrapper{
+	margin-top:20px;
+}

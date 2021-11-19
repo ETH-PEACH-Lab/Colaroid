@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <title>Colaroid Notebook</title>
+        <base href="<%= htmlWebpackPlugin.options.indexUrl %>" />
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="text/javascript">
+            function resolvePath(relativePath) {
+                if (relativePath && relativePath[0] == '.' && relativePath[1]!= '.') {
+                    return '<%= htmlWebpackPlugin.options.imageBaseUrl %>' + relativePath.substring(1);
+                }
+                return '<%= htmlWebpackPlugin.options.imageBaseUrl %>' + relativePath;
+            }
+        </script>
+    </body>
+</html>
