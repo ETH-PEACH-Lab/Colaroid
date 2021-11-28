@@ -266,3 +266,13 @@ iframe {
 #dropdown-item-button{
 	font-size: 10px;
 }
+
+.myInlineDecoration {
+	background-color: rgba(216, 241, 169, 0.25);
+}
+
+.myLineDecoration {
+	background: #4e710c;
+	width: 5px !important;
+	margin-left: 3px;
+}

@@ -13,7 +13,6 @@ export function CellCodeEditor(props: CellProps) {
     const switchFileIndex = (index) => {
         setCurrentFileIndex(index);
     };
-    // TODO: scroll the diff editor to the first line
     const options = {
         cursorBlinking: 'smooth',
         folding: true,

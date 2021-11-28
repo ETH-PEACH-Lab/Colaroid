@@ -6,7 +6,7 @@ export const Output = (props: CellProps) =>{
     const isHTML = props.content.result[0].format === 'html';
     return <div>
         {isHTML &&
-        <HTMLOutputRender content={props.content} index={props.index} />    
+        <HTMLOutputRender content={props.content} index={props.index} cstyle={props.cstyle} />    
         }
     </div>;
 };

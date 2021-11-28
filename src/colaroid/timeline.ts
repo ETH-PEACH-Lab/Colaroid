@@ -4,9 +4,10 @@ import { getNonce, getWebviewOptions, readLocalDoc } from "./utils";
 import { GitService } from "./gitService";
 import parseGitDiff from 'parse-git-diff';
 const decorationType = vscode.window.createTextEditorDecorationType({
-	backgroundColor: 'green',
-	border: '2px solid white',
-  });
+	backgroundColor: 'rgba(76, 255, 200, 0.2)',
+	gutterIconPath: vscode.Uri.parse('https://cdn.jsdelivr.net/gh/vsls-contrib/code-tour/images/icon.png'),
+	gutterIconSize: "contain"
+});
 
 export class ColaroidTimelinePanel {
     public static currentPanel: ColaroidTimelinePanel | undefined;
@@ -134,6 +135,7 @@ export class ColaroidTimelinePanel {
 				const editors = vscode.window.visibleTextEditors;
 				editors.forEach(editor => {
 					this.clearDecorations(editor);
+					console.log('after clear editor')
 					this.renderDiff(editor, message.pid, message.id);
 				});
 			}
@@ -145,6 +147,7 @@ export class ColaroidTimelinePanel {
 		if(fileName && fileName!==''){
 			const result = await this.gitService.generateDiff(hashA, hashB, fileName);
 			const lines = this.parseDiffInfo(result);
+			console.log('render decorator for lines', lines)
 			this.renderDecorations(lines, editor);
 		}
 	}
@@ -171,6 +174,7 @@ export class ColaroidTimelinePanel {
 		let sourceCode = editor.document.getText();
 		const sourceCodeArr = sourceCode.split('\n');
 		lines.forEach(line => {
+			console.log(line, sourceCodeArr[line-1]);
 			let range = new vscode.Range(
 				new vscode.Position(line - 1, 0),
 				new vscode.Position(line - 1, sourceCodeArr[line-1]?.length)
@@ -178,6 +182,7 @@ export class ColaroidTimelinePanel {
 			let decoration = { range };
 			  decorationsArray.push(decoration);
 		});
+		console.log('decoration array', decorationsArray)
 		editor.setDecorations(decorationType, decorationsArray);
 		//TODO: properly remove decorations
 		//TODO: disappear when switching files

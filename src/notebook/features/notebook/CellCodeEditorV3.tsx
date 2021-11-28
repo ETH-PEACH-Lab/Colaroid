@@ -13,7 +13,6 @@ export function CellCodeEditorV3(props: CellProps) {
     const switchFileIndex = (index) => {
         setCurrentFileIndex(index);
     };
-    // TODO: scroll the diff editor to the first line
     const options = {
         cursorBlinking: 'smooth',
         folding: true,
@@ -41,7 +40,6 @@ export function CellCodeEditorV3(props: CellProps) {
     const editorDidMount = (editor, monaco) => {
         editor.onDidUpdateDiff(() => {
             const changes = editor.getLineChanges();
-            console.log(changes);
             let oPrevLine = 2;
             let mPrevLine = 2;
             let originalHiddenArea = [] as any;
@@ -50,37 +48,37 @@ export function CellCodeEditorV3(props: CellProps) {
                 let oChangeStart;
                 let mChangeStart;
                 // if add lines
-                if(change.originalEndLineNumber === 0) {
+                if (change.originalEndLineNumber === 0) {
                     oChangeStart = change.originalStartLineNumber - 1;
                     mChangeStart = change.modifiedStartLineNumber - 2;
-                    if(oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
-                    if(mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
+                    if (oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
+                    if (mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
                     oPrevLine = change.originalStartLineNumber + 2;
                     mPrevLine = change.modifiedEndLineNumber + 2;
                 }
 
                 // if delete lines
-                if(change.modifiedEndLineNumber === 0) {
+                if (change.modifiedEndLineNumber === 0) {
                     oChangeStart = change.originalStartLineNumber - 2;
                     mChangeStart = change.modifiedStartLineNumber - 1;
-                    if(oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
-                    if(mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
+                    if (oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
+                    if (mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
                     oPrevLine = change.originalEndLineNumber + 2;
                     mPrevLine = change.modifiedStartLineNumber + 2;
                 }
 
                 // if modify lines
-                if(change.originalEndLineNumber != 0 && change.modifiedEndLineNumber != 0) {
+                if (change.originalEndLineNumber != 0 && change.modifiedEndLineNumber != 0) {
                     oChangeStart = change.originalStartLineNumber - 1;
                     mChangeStart = change.modifiedStartLineNumber - 1;
-                    if(oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
-                    if(mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
+                    if (oChangeStart > oPrevLine) originalHiddenArea.push(new monaco.Range(oPrevLine, 1, oChangeStart, 1));
+                    if (mChangeStart > mPrevLine) modifiedHiddenArea.push(new monaco.Range(mPrevLine, 1, mChangeStart, 1));
                     oPrevLine = change.originalEndLineNumber + 2;
                     mPrevLine = change.modifiedEndLineNumber + 2;
                 }
             });
-            editor.getOriginalEditor().setHiddenAreas(originalHiddenArea); 
-            editor.getModifiedEditor().setHiddenAreas(modifiedHiddenArea); 
+            editor.getOriginalEditor().setHiddenAreas(originalHiddenArea);
+            editor.getModifiedEditor().setHiddenAreas(modifiedHiddenArea);
         });
     };
 

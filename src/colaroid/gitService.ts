@@ -1,5 +1,6 @@
 import simpleGit, { SimpleGit, SimpleGitOptions } from "simple-git";
 import * as fs from "fs";
+import { sleep } from "./utils";
 
 export class GitService {
     private git: SimpleGit;
@@ -54,6 +55,7 @@ export class GitService {
 
     public revertGit = async (hash: string): Promise<any> => {
         const revertResult = await this.git.reset(["--hard", hash]);
+        await sleep(1000);
         return true;
     };
 

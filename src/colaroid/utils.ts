@@ -17,6 +17,10 @@ export const getWebviewOptions = (extensionUri: vscode.Uri): vscode.WebviewOptio
 	};
 }
 
+export const sleep = (ms) => {
+	return new Promise(resolve => setTimeout(resolve, ms));
+};
+
 export const getNonce = () => {
 	let text = "";
 	const possible =
