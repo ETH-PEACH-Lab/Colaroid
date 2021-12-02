@@ -10,7 +10,8 @@ export interface CodeData {
 export interface CellData {
     message: string,
     hash: string,
-    result: CodeData[]
+    result: CodeData[],
+    recording: string
 }
 
 export const notebookSlice = createSlice({

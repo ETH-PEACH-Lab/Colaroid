@@ -4,35 +4,68 @@ import { useDispatch } from 'react-redux';
 import { InputBox } from './features/inputbox/InputBox';
 import { Instruction } from './features/instruction/Instruction';
 import { Notebook } from './features/notebook/Notebook';
-import { appendContent } from './features/notebook/notebookSlice';
-import { vscode } from './utils';
+import { appendContent, initState } from './features/notebook/notebookSlice';
+import { vscode, isExtension } from './utils';
+
 export function App() {
     const dispatch = useDispatch();
     // using the useEffect hock to set Event Listener
     useEffect(() => {
-        // send message back
-        vscode.postMessage({
-            command: "ready"
-        });
-        const handleMessage = (event) => {
-             switch (event.data.command) {
-                case "append":
-                    dispatch(appendContent(event.data.content));
-                    break;
-                default:
-                    break;
+        if (isExtension) {
+            // send message back
+            vscode.postMessage({
+                command: "ready"
+            });
+            const handleMessage = (event) => {
+                switch (event.data.command) {
+                    case "append":
+                        dispatch(appendContent(event.data.content));
+                        break;
+                    default:
+                        break;
+                }
+            };
+            window.addEventListener("message", handleMessage);
+            return () => {
+                window.removeEventListener("message", handleMessage);
+            }; // run code when the component unmounts
+        }
+        else {
+            // load state from a JSON file
+            fetch("../state/state.json")
+                .then(response => {
+                    return response.json();
+                })
+                .then(jsondata =>
+                    {
+                        dispatch(initState(jsondata.notebook));
+                    }
+                );
+            const additional_style = document.createElement('style');
+            additional_style.innerHTML = `
+            :root {
+                --vscode-editor-background: #1e1e1e;
+                --vscode-editor-foreground: #d4d4d4;
+                --vscode-editor-font-size: 12px;
+                --vscode-editor-font-weight: normal;
             }
-        };
-        window.addEventListener("message", handleMessage);
-        return () => {
-            window.removeEventListener("message", handleMessage);
-        }; // run code when the component unmounts
+            body{
+                padding: 20px 100px;
+            }
+            `
+            document.head.appendChild(additional_style)
+        }
     }, []);
 
 
     return <div>
+        {isExtension ?
+        <>
         <InputBox />
         <Instruction />
         <Notebook />
+        </>:
+        <Notebook />
+        }
     </div>;
 }

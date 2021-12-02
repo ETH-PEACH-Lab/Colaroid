@@ -1,22 +1,22 @@
 import { CellProps } from "../notebook/Cell";
 import * as React from 'react';
-import { Button } from "react-bootstrap";
-import { sleep } from "../../../colaroid/utils";
+import { ProgressBar } from "react-bootstrap";
+import { isExtension, vscode } from "../../utils";
+import unique from 'unique-selector';
 
 
 export const HTMLOutputRender = (props: CellProps) => {
     const iframeWrapperRef = React.createRef<HTMLDivElement>();
-    const recordRef = React.createRef<HTMLButtonElement>();
-    const playRef = React.createRef<HTMLButtonElement>();
+    const recordRef = React.createRef<HTMLLIElement>();
+    const playRef = React.createRef<HTMLLIElement>();
 
     const item = props.content.result[0];
     const [iframeDocument, setIframeDocument] = React.useState(null);
-
+    const [progress, setProgress] = React.useState(0);
+    const [recording, setRecording] = React.useState(props.content.recording ? JSON.parse(props.content.recording) : { events: [], startTime: -1 });
     // config
     const SPEED = 1;
     let isRecord = false;
-    let recording = { events: [], startTime: -1 };
-
 
     React.useEffect(() => {
         let iframeEle = iframeWrapperRef.current.childNodes[0] as HTMLIFrameElement;
@@ -65,6 +65,7 @@ export const HTMLOutputRender = (props: CellProps) => {
                     y: e.pageY,
                     time: Date.now()
                 });
+                setRecording(recording);
             }
         },
         {
@@ -72,11 +73,12 @@ export const HTMLOutputRender = (props: CellProps) => {
             handler: function handleClick(e) {
                 recording.events.push({
                     type: "click",
-                    target: e.target,
+                    target: serializeDOM(e.target),
                     x: e.pageX,
                     y: e.pageY,
                     time: Date.now()
                 });
+                setRecording(recording);
             }
         },
         {
@@ -84,23 +86,33 @@ export const HTMLOutputRender = (props: CellProps) => {
             handler: function handleKeyPress(e) {
                 recording.events.push({
                     type: "keypress",
-                    target: e.target,
+                    target: serializeDOM(e.target),
                     value: e.target.value,
                     keyCode: e.keyCode,
                     time: Date.now()
                 });
+                setRecording(recording);
             }
         }
     ];
 
+    const serializeDOM = (el: HTMLElement) => {
+        return unique(el);
+    };
+
+    const parseDOM = (selector, parentNode) => {
+        return parentNode.querySelector(selector);
+    };
+
     const startRecord = () => {
         recording.startTime = Date.now();
         recording.events = [];
+        setRecording(recording)
         handlers.map(x => listen(x.eventName, x.handler));
-    }
+    };
     const stopRecord = () => {
         handlers.map(x => removeListener(x.eventName, x.handler));
-    }
+    };
 
     function listen(eventName, handler) {
         // listens even if stopPropagation
@@ -117,7 +129,8 @@ export const HTMLOutputRender = (props: CellProps) => {
     }
 
     const startPlay = () => {
-        recordRef.current.disabled = true;
+        if (recording.events.length === 0) return;
+
         const fakeCursor = document.createElement('div');
         fakeCursor.className = 'cursor';
 
@@ -131,6 +144,8 @@ export const HTMLOutputRender = (props: CellProps) => {
             }
             let offsetRecording = event.time - recording.startTime;
             let offsetPlay = (Date.now() - startPlay) * SPEED;
+            let totalTime = recording.events[recording.events.length - 1].time - recording.startTime;
+            setProgress(offsetPlay / totalTime * 100);
             if (offsetPlay >= offsetRecording) {
                 drawEvent(event, fakeCursor);
                 i++;
@@ -139,8 +154,8 @@ export const HTMLOutputRender = (props: CellProps) => {
             if (i < recording.events.length) {
                 requestAnimationFrame(draw);
             } else {
-                iframeDocument.removeChild(fakeCursor)
-                recordRef.current.disabled = false;
+                setProgress(0);
+                iframeDocument.removeChild(fakeCursor);
             }
         })();
     };
@@ -148,13 +163,21 @@ export const HTMLOutputRender = (props: CellProps) => {
     const handleRecord = (e) => {
         if (isRecord) {
             stopRecord();
-            e.target.innerText = "Start Record";
-            playRef.current.disabled = false;
+            // e.target.innerText = "Start Record";
+            playRef.current.classList.toggle('stop');
+            recordRef.current.innerHTML = '<i class="codicon codicon-record"></i>';
+            recordRef.current.classList.toggle('active');
+            vscode.postMessage({
+                content: JSON.stringify(recording),
+                command: "save recording",
+                id: props.content.hash
+            });
         }
         else {
             startRecord();
-            e.target.innerText = "Stop Record";
-            playRef.current.disabled = true;
+            playRef.current.classList.toggle('stop');
+            recordRef.current.innerHTML = '<i class="codicon codicon-stop-circle"></i>';
+            recordRef.current.classList.toggle('active');
         }
         isRecord = !isRecord;
     };
@@ -166,19 +189,20 @@ export const HTMLOutputRender = (props: CellProps) => {
         }
 
         if (event.type === "click") {
+            let target = parseDOM(event.target, iframeDocument)
             flashClass(fakeCursor, "click");
-            flashClass(event.target, "clicked");
+            flashClass(target, "clicked");
             var clickEvent = document.createEvent("MouseEvents");
             clickEvent.initMouseEvent("click", true, true, window, 1, 0, 0, 0, 0,
                 false, false, false, false, 0, null);
-            event.target.dispatchEvent(clickEvent)
+            target.dispatchEvent(clickEvent)
         }
     };
     const flashClass = (el: HTMLElement, className) => {
-        el.classList.add(className)
+        el?.classList?.add(className)
         setTimeout(() => {
-            el.classList.remove(className)
-        }, 200)
+            el?.classList?.remove(className);
+        }, 200);
     };
     const reload = () => {
         iframeWrapperRef.current.innerHTML = '<iframe> <iframe/>';
@@ -189,13 +213,18 @@ export const HTMLOutputRender = (props: CellProps) => {
         iframeDoc.writeln(item.content);
         iframeDoc.close();
     };
-    
+
     return <div>
         <div className="preview-cell-wrapper" id={`preview-cell-wrapper-${props.content.hash}`}>
             <div>
-                <Button onClick={handleRecord} ref={recordRef}>Record</Button>
-                <Button onClick={startPlay} ref={playRef}>Play</Button>
-                <Button onClick={reload}>Reload</Button>
+                <ul className='toolbar-wrapper'>
+                    <li className='wrapper-button' onClick={reload}><i className="codicon codicon-refresh"></i></li>
+                    {isExtension &&
+                        <li className='wrapper-button' onClick={handleRecord} ref={recordRef}><i className="codicon codicon-record"></i></li>
+                    }
+                    <li className='wrapper-button' onClick={startPlay} ref={playRef}><i className="codicon codicon-play"></i></li>
+                    <li className='wrapper-progress' ><ProgressBar now={progress} /></li>
+                </ul>
             </div>
             <div id="wrapper" ref={iframeWrapperRef}>
                 <iframe></iframe>

@@ -3,6 +3,7 @@ import { useAppSelector } from '../../app/hooks';
 import { selectContent } from '../notebook/notebookSlice';
 export const Instruction = () => {
     const content = useAppSelector(selectContent);
+
     return <div>
         {content.length === 0 &&
             <article id="start-container">
