@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { GitService } from "./gitService";
-import { getNonce, getWebviewOptions, readLocalDoc, saveLocalDoc } from "./utils";
+import { getNonce, getWebviewOptions, readLocalDoc, saveLocalDoc, saveState } from "./utils";
 
 export class ColaroidNotebookPanel {
 	/**
@@ -78,18 +78,18 @@ export class ColaroidNotebookPanel {
 
 	private async initMessage(){
 		for (const data of this.content) {
-			const { hash, message } = data;
+			const { hash, message, recording } = data;
 			const result = await this.gitService.retrieveGitCommit(hash);
-			const content = { message, ...result };
+			const content = { message, ...result, recording };
 			this.panel.webview.postMessage({ command: "append", content });
 		}
 	}
 
 	private async appendCell(data: any) {
 		// append the last cell
-		const { hash, message } = data;
+		const { hash, message, recording } = data;
 		const result = await this.gitService.retrieveGitCommit(hash);
-		const content = { message, ...result };
+		const content = { message, ...result, recording };
 		this.panel.webview.postMessage({ command: "append", content });
 	}
 	// this sends command to the frontend to clean the current rendering and update the views
@@ -154,7 +154,7 @@ export class ColaroidNotebookPanel {
 			this.gitService.createGitCommit(message.content).then((result) => {
 				const data = {
 					message: message.content,
-					hash: result.commit,
+					hash: result.commit
 				};
 				this.content.push(data);
 				saveLocalDoc(this.path, this.content);
@@ -203,6 +203,18 @@ export class ColaroidNotebookPanel {
 			}
 		if (message.command === "revert snapshot") {
 			this.gitService.revertGit(message.id);
+		}
+		if (message.command === "save recording") {
+			console.log('save recording')
+			const index = this.content.findIndex((item, idx) => {
+				return item.hash === message.id;
+			});
+			this.content[index].recording = message.content;
+			saveLocalDoc(this.path, this.content);
+		}
+		if (message.command === "export state") {
+			console.log('export state')
+			saveState(path.join(this.extensionUri.path, "dist", "state", "state.json"), message.content)
 		}
 	}
 }

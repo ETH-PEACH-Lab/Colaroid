@@ -54,21 +54,24 @@ export function CellCodeEditorV2(props: CellProps) {
     };
 
     const renderDiff = (myeditor, mychanges) => {
+        // todo: add a red mark when lines are deleted
         if (myeditor && (mychanges.length > 0)) {
             mychanges.forEach(mychange => {
-                myeditor.deltaDecorations(
-                    [],
-                    [
-                        {
-                            range: new monaco.Range(mychange.modifiedStartLineNumber, 1, mychange.modifiedEndLineNumber, 1),
-                            options: {
-                                isWholeLine: true,
-                                linesDecorationsClassName: 'myLineDecoration',
-                                inlineClassName: 'myInlineDecoration'
+                if(mychange.modifiedStartLineNumber < mychange.modifiedEndLineNumber) {
+                    myeditor.deltaDecorations(
+                        [],
+                        [
+                            {
+                                range: new monaco.Range(mychange.modifiedStartLineNumber, 1, mychange.modifiedEndLineNumber, 1),
+                                options: {
+                                    isWholeLine: true,
+                                    linesDecorationsClassName: 'myLineDecoration',
+                                    inlineClassName: 'myInlineDecoration'
+                                }
                             }
-                        }
-                    ]
-                )
+                        ]
+                    )
+                }
             })
             myeditor.revealLineNearTop(mychanges[0].modifiedStartLineNumber);
         }

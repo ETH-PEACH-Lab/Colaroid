@@ -6,6 +6,7 @@ import { CellCodeEditor } from './CellCodeEditor';
 import { Output } from '../output/Output';
 import { CellCodeEditorV2 } from './CellCodeEditorV2';
 import { CellCodeEditorV3 } from './CellCodeEditorV3';
+import { isExtension } from '../../utils';
 export interface CellProps {
     content: CellData,
     index: number,
@@ -14,7 +15,9 @@ export interface CellProps {
 export function Cell(props: CellProps) {
 
     return <div className='cell-wrapper' id={`cell-wrapper-${props.content.hash}`}>
-        <CellToolbar hash={props.content.hash} />
+        {isExtension &&
+                <CellToolbar hash={props.content.hash} />
+        }
         <CellMDEditor content={props.content} index={props.index} cstyle={props.cstyle}/>
         {props.cstyle === 0 &&
             <CellCodeEditor content={props.content} index={props.index} cstyle={props.cstyle}/>

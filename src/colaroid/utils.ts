@@ -49,3 +49,7 @@ export const readLocalDoc = async (dir: string): Promise<any> => {
 export const saveLocalDoc = async (dir: string, data: any): Promise<any> => {
 	fs.writeFileSync(`${dir}/.colaroid`, JSON.stringify(data));
 };
+
+export const saveState = async (dir: string, data: any): Promise<any> => {
+	fs.writeFileSync(dir, JSON.stringify(data));
+};

@@ -117,9 +117,9 @@ export class ColaroidTimelinePanel {
     private initMessage = async () => {
         console.log(this.content)
         for (const data of this.content) {
-			const { hash, message } = data;
+			const { hash, message, recording } = data;
 			const result = await this.gitService.retrieveGitCommit(hash);
-			const content = { message, ...result };
+			const content = { message, ...result, recording };
 			this.panel.webview.postMessage({ command: "append", content });
 		}
     };

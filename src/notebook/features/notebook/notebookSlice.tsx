@@ -4,13 +4,14 @@ import { RootState } from '../../app/store';
 export interface CodeData {
   content: string,
   format: string,
-  title: string
+  title: string,
 }
 
 export interface CellData {
     message: string,
     hash: string,
-    result: CodeData[]
+    result: CodeData[],
+    recording: string
 }
 
 export const notebookSlice = createSlice({
@@ -20,6 +21,9 @@ export const notebookSlice = createSlice({
       content: []
     },
     reducers: {
+      initState: (state, action) => {
+        state.content = action.payload.content
+      },
       appendContent: (state, action) => {
           state.content.push(action.payload);
       },
@@ -61,6 +65,6 @@ export const notebookSlice = createSlice({
   });
   
   // Action creators are generated for each case reducer function
-  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp } = notebookSlice.actions;
+  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState } = notebookSlice.actions;
   export const selectContent = (state: RootState) => state.notebook.content;
   export default notebookSlice.reducer;

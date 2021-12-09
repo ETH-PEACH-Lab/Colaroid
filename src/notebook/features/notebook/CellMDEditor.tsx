@@ -4,7 +4,7 @@ import MonacoEditor, { EditorConstructionOptions, monaco } from "react-monaco-ed
 import MarkdownView from 'react-showdown';
 import { useAppDispatch } from '../../app/hooks';
 import { changeMarkdown } from './notebookSlice';
-import { vscode } from '../../utils';
+import { isExtension, vscode } from '../../utils';
 
 export function CellMDEditor(props: CellProps) {
     const [mode, setMode] = React.useState(false);
@@ -27,7 +27,7 @@ export function CellMDEditor(props: CellProps) {
     };
 
     const switchMode = () => {
-        setMode(!mode);
+        if(isExtension)setMode(!mode);
     };
 
     const keydownHandler = (e) => {
