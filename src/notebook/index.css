@@ -303,12 +303,14 @@ iframe {
 
 .mdwrapper {
 	padding:20px 10px;
+	margin-bottom: 100px;
 }
 .selectedwrapper {
 	background-color: #313131;
 	border-radius: 5px;
 	padding:20px 10px;
 	border-left: 2px solid rgb(76, 169, 255);
+	margin-bottom: 100px;
 }
 
 .selectedwrapper::before{
@@ -325,4 +327,5 @@ iframe {
 }
 .mdlist-wrapper{
 	overflow-y: scroll;
+	height: 80vh;
 }

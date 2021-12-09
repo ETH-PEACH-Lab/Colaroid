@@ -25,7 +25,7 @@ export const HTMLOutputRender = (props: CellProps) => {
         iframeDoc.open();
         iframeDoc.writeln(item.content);
         iframeDoc.close();
-    }, []);
+    }, [props.content]);
 
     const onOutputLoad = (e) => {
         setIframeDocument(e.target.contentWindow.document.body);
