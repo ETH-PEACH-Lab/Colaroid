@@ -16,7 +16,7 @@ export function Cell(props: CellProps) {
 
     return <div className='cell-wrapper' id={`cell-wrapper-${props.content.hash}`}>
         {isExtension &&
-                <CellToolbar hash={props.content.hash} />
+                <CellToolbar hash={props.content.hash} index={props.index}/>
         }
         <CellMDEditor content={props.content} index={props.index} cstyle={props.cstyle}/>
         {props.cstyle === 0 &&

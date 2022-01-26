@@ -28,6 +28,7 @@ export class GitService {
 
     public createGitCommit = async (message: string): Promise<any> => {
         const addResult = await this.git.add(["--all"]);
+        console.log(addResult)
         const commitResult = await this.git.commit(message);
         return commitResult;
     };

@@ -31,6 +31,9 @@ export const notebookSlice = createSlice({
           const content = state.content.filter(cell => cell.hash!=action.payload);
           state.content = content
       },
+      cleanContent: (state, action) => {
+          state.content = []
+      },
       changeMarkdown: (state, action) => {
           state.content.forEach(e => {
             if(e.hash === action.payload.hash) {
@@ -65,6 +68,6 @@ export const notebookSlice = createSlice({
   });
   
   // Action creators are generated for each case reducer function
-  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState } = notebookSlice.actions;
+  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState, cleanContent } = notebookSlice.actions;
   export const selectContent = (state: RootState) => state.notebook.content;
   export default notebookSlice.reducer;

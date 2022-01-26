@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { CellData, deleteCell, moveCellDown, moveCellUp, selectContent } from "./notebookSlice";
-import { Button } from 'react-bootstrap';
 import { vscode } from '../../utils';
-import { current } from 'immer';
 
 interface CellToolbarProps {
-    hash: string
+    hash: string,
+    index: number
 }
 export function CellToolbar(props: CellToolbarProps) {
     const content = useAppSelector(selectContent);
+    const [isEditing, setIsEditing] = React.useState(false);
     const dispatch = useAppDispatch();
     const deleteHandler = () => {
         dispatch(deleteCell(props.hash));
@@ -17,10 +17,6 @@ export function CellToolbar(props: CellToolbarProps) {
             command: "remove cell",
             id: props.hash,
         });
-    };
-
-    const toggleHandler = () => {
-
     };
 
 
@@ -53,6 +49,23 @@ export function CellToolbar(props: CellToolbarProps) {
         });
     };
 
+    const editHandler = () => {
+        if(isEditing){
+            vscode.postMessage({
+                command: "edit snapshot",
+                id: props.hash,
+                index: props.index
+            });
+        }
+        else {
+            vscode.postMessage({
+                command: "revert snapshot",
+                id: props.hash,
+            });
+        }
+        setIsEditing(!isEditing);
+    }
+
     const findIndex = () => {
         let target;
         content.forEach((e, index) => {
@@ -66,6 +79,7 @@ export function CellToolbar(props: CellToolbarProps) {
     return <div>
         <ul className='toolbar-wrapper' id={`toolbar-wrapper-${props.hash}`}>
             <li className='wrapper-button' onClick={revertHandler}><i className="codicon codicon-file-code"></i></li>
+            <li className='wrapper-button' onClick={editHandler}><i className={isEditing?"codicon codicon-save-as":"codicon codicon-edit"}></i></li>
             {/* <li className='wrapper-button toggle-button' onClick={toggleHandler}></li> */}
             <li className='wrapper-button' onClick={moveUpHandler}><i className="codicon codicon-arrow-up"></i></li>
             <li className='wrapper-button' onClick={moveDownHandler}><i className="codicon codicon-arrow-down"></i></li>
