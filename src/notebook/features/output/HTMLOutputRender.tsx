@@ -22,6 +22,7 @@ export const HTMLOutputRender = (props: CellProps) => {
         let iframeEle = iframeWrapperRef.current.childNodes[0] as HTMLIFrameElement;
         iframeEle.addEventListener('load', onOutputLoad);
         let iframeDoc = iframeEle.contentDocument;
+        console.log('yes iframe', iframeDoc.baseURI)
         iframeDoc.open();
         iframeDoc.writeln(item.content);
         iframeDoc.close();
