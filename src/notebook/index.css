@@ -95,10 +95,7 @@ header {
 	margin: 0 auto;
 }
 .toolbar-wrapper {
-	margin-top: 5px;
-	display:inline-flex;
 	list-style-type: none;
-	margin-bottom: 5px;
 	background-color: rgb(30, 30, 30);
 	border: 1px solid rgba(128,128,128,0.35);
 	padding-left:0px;
@@ -163,13 +160,10 @@ header {
 	font-weight: 700;
 }
 .wrapper-button {
-	display: flex;
+	display: inline;
     align-items: center;
     justify-content: center;
-	border-radius: 5px;
-	width: 16px;
-	height: 16px;
-	margin: 5px;
+	padding: 5px;
 }
 .wrapper-progress{
 	width: 150px;
@@ -307,10 +301,13 @@ iframe {
 }
 .selectedwrapper {
 	background-color: #313131;
-	border-radius: 5px;
 	padding:20px 10px;
 	border-left: 2px solid rgb(76, 169, 255);
 	margin-bottom: 100px;
+}
+
+.selectedwrapper:hover{
+	background-color: #313131;	
 }
 
 .selectedwrapper::before{

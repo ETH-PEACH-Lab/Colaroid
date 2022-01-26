@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { InputBox } from './features/inputbox/InputBox';
 import { Instruction } from './features/instruction/Instruction';
 import { Notebook } from './features/notebook/Notebook';
-import { appendContent, initState } from './features/notebook/notebookSlice';
+import { appendContent, initState, cleanContent } from './features/notebook/notebookSlice';
 import { vscode, isExtension } from './utils';
 
 export function App() {
@@ -20,6 +20,9 @@ export function App() {
                 switch (event.data.command) {
                     case "append":
                         dispatch(appendContent(event.data.content));
+                        break;
+                    case "clean":
+                        dispatch(cleanContent({}));
                         break;
                     default:
                         break;
