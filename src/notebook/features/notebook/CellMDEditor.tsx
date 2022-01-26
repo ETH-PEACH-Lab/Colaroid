@@ -65,7 +65,7 @@ export function CellMDEditor(props: CellProps) {
                 <div ref={markdownEditorRef} className='md-cell-editor' id={`md-cell-editor-${props.content.hash}`} style={{ height: height }} onKeyDown={keydownHandler} onKeyUp={keyupHandler}>
                     <MonacoEditor
                         language="markdown"
-                        options={{ ...options, readOnly: false } as EditorConstructionOptions}
+                        options={{ ...options, readOnly: false, wordWrap: 'on' } as EditorConstructionOptions}
                         value={markdownValue}
                         theme="vs-dark"
                         onChange={onChangeHandler}
