@@ -1,14 +1,16 @@
 import * as React from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { CellData, deleteCell, moveCellDown, moveCellUp, selectContent } from "./notebookSlice";
+import { CellData, deleteCell, moveCellDown, moveCellUp, selectContent, updateActiveEdit, selectActiveEdit } from "./notebookSlice";
 import { vscode } from '../../utils';
 
 interface CellToolbarProps {
     hash: string,
-    index: number
+    index: number,
+    mdOnly: boolean
 }
 export function CellToolbar(props: CellToolbarProps) {
     const content = useAppSelector(selectContent);
+    const activeEdit = useAppSelector(selectActiveEdit);
     const [isEditing, setIsEditing] = React.useState(false);
     const dispatch = useAppDispatch();
     const deleteHandler = () => {
@@ -50,21 +52,23 @@ export function CellToolbar(props: CellToolbarProps) {
     };
 
     const editHandler = () => {
-        if(isEditing){
+        if (isEditing) {
             vscode.postMessage({
                 command: "edit snapshot",
                 id: props.hash,
                 index: props.index
             });
+            dispatch(updateActiveEdit(-1));
         }
         else {
             vscode.postMessage({
                 command: "revert snapshot",
                 id: props.hash,
             });
+            dispatch(updateActiveEdit(findIndex()));
         }
         setIsEditing(!isEditing);
-    }
+    };
 
     const findIndex = () => {
         let target;
@@ -76,10 +80,14 @@ export function CellToolbar(props: CellToolbarProps) {
         return target;
     };
 
-    return <div>
+    return <div style={{overflow: 'auto'}}>
         <ul className='toolbar-wrapper' id={`toolbar-wrapper-${props.hash}`}>
-            <li className='wrapper-button' onClick={revertHandler}><i className="codicon codicon-file-code"></i></li>
-            <li className='wrapper-button' onClick={editHandler}><i className={isEditing?"codicon codicon-save-as":"codicon codicon-edit"}></i></li>
+            {!props.mdOnly &&
+                <li className='wrapper-button' onClick={revertHandler}><i className="codicon codicon-file-code"></i></li>
+            }
+            {!props.mdOnly &&
+                <li className='wrapper-button' onClick={editHandler}><i className={activeEdit === findIndex() ? "codicon codicon-save-as" : "codicon codicon-edit"}></i></li>
+            }
             {/* <li className='wrapper-button toggle-button' onClick={toggleHandler}></li> */}
             <li className='wrapper-button' onClick={moveUpHandler}><i className="codicon codicon-arrow-up"></i></li>
             <li className='wrapper-button' onClick={moveDownHandler}><i className="codicon codicon-arrow-down"></i></li>

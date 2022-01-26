@@ -18,7 +18,8 @@ export const notebookSlice = createSlice({
     name: 'notebook',
     initialState: {
       value: 0,
-      content: []
+      content: [],
+      activeEdit: -1
     },
     reducers: {
       initState: (state, action) => {
@@ -33,6 +34,9 @@ export const notebookSlice = createSlice({
       },
       cleanContent: (state, action) => {
           state.content = []
+      },
+      updateActiveEdit: (state, action) => {
+        state.activeEdit = action.payload;
       },
       changeMarkdown: (state, action) => {
           state.content.forEach(e => {
@@ -68,6 +72,7 @@ export const notebookSlice = createSlice({
   });
   
   // Action creators are generated for each case reducer function
-  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState, cleanContent } = notebookSlice.actions;
+  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState, cleanContent, updateActiveEdit } = notebookSlice.actions;
   export const selectContent = (state: RootState) => state.notebook.content;
+  export const selectActiveEdit = (state: RootState) => state.notebook.activeEdit;
   export default notebookSlice.reducer;

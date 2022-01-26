@@ -13,6 +13,7 @@ export function CellCodeEditor(props: CellProps) {
     const switchFileIndex = (index) => {
         setCurrentFileIndex(index);
     };
+
     const options = {
         cursorBlinking: 'smooth',
         folding: true,

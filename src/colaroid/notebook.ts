@@ -206,11 +206,13 @@ export class ColaroidNotebookPanel {
 		}
 		if (message.command === "edit snapshot") {
 			this.gitService.createGitCommit('edit snapshot').then((result) => {
-				let content = this.content[message.index];
-				content.hash = result.commit;
-				this.content[message.index] = content;
-				saveLocalDoc(this.path, this.content);
-				this.refresh();
+				if(result.commit !== ''){
+					let content = this.content[message.index];
+					content.hash = result.commit;
+					this.content[message.index] = content;
+					saveLocalDoc(this.path, this.content);
+					this.refresh();
+				}
 			});	
 		}
 		if (message.command === "save recording") {

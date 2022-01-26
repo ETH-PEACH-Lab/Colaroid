@@ -9,6 +9,7 @@ import { isExtension } from '../../utils';
 import { Slide } from '../slide/Slide';
 export function Notebook() {
     const content = useAppSelector(selectContent);
+    console.log(content)
     const [style, setStyle] = React.useState(0);
     const [notebookView, setNotebookView] = React.useState(0);
     const exportNotebook = () => {
@@ -36,7 +37,7 @@ export function Notebook() {
         {notebookView === 0?
         <div>
         {content.map((cell, index) => 
-        <Cell content={cell} index={index} key={index} cstyle={style}/>
+        <Cell content={cell} index={index} key={index} cstyle={style} mdOnly={cell.result.length===0}/>
         )}
         </div>
         :
