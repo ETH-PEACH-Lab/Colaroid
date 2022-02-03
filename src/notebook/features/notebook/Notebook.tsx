@@ -9,9 +9,7 @@ import { isExtension } from '../../utils';
 import { Slide } from '../slide/Slide';
 export function Notebook() {
     const content = useAppSelector(selectContent);
-    console.log(content)
-    const [style, setStyle] = React.useState(0);
-    const [notebookView, setNotebookView] = React.useState(0);
+     const [notebookView, setNotebookView] = React.useState(0);
     const exportNotebook = () => {
         const state = store.getState();
         vscode.postMessage({
@@ -21,15 +19,10 @@ export function Notebook() {
     };
     return <div>
         <ButtonGroup id="notebook-toolbar">
-        <DropdownButton title="Notebook Style" className="notebook-toolbar-btn">
+        {/* <DropdownButton title="Notebook Style" className="notebook-toolbar-btn">
             <Dropdown.Item as="button"  onClick={() => { setNotebookView(0)}}>Article View</Dropdown.Item>
             <Dropdown.Item as="button" onClick={() => { setNotebookView(1)}}>Slide View</Dropdown.Item>
-        </DropdownButton>
-        <DropdownButton className="notebook-toolbar-btn" title="Diff Style">
-            <Dropdown.Item as="button" onClick={() => { setStyle(0)}}>Original Diff</Dropdown.Item>
-            <Dropdown.Item as="button" onClick={() => { setStyle(1)}}>Highlight Modified</Dropdown.Item>
-            <Dropdown.Item as="button" onClick={() => { setStyle(2)}}>Diff Only</Dropdown.Item>
-        </DropdownButton>
+        </DropdownButton> */}
         {isExtension &&
                 <Button className="notebook-toolbar-btn" onClick={exportNotebook}>Export</Button>
         }
@@ -37,11 +30,11 @@ export function Notebook() {
         {notebookView === 0?
         <div>
         {content.map((cell, index) => 
-        <Cell content={cell} index={index} key={index} cstyle={style} mdOnly={cell.result.length===0}/>
+        <Cell content={cell} index={index} key={index} mdOnly={cell.result.length===0}/>
         )}
         </div>
         :
-        <Slide cstyle={style}></Slide>    
+        <Slide></Slide>    
     }
 
     </div>;

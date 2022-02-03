@@ -7,11 +7,13 @@ interface CellToolbarProps {
     hash: string,
     index: number,
     mdOnly: boolean
+    switchStyle
 }
 export function CellToolbar(props: CellToolbarProps) {
     const content = useAppSelector(selectContent);
     const activeEdit = useAppSelector(selectActiveEdit);
     const [isEditing, setIsEditing] = React.useState(false);
+    const [styleIcon, setStyleIcon] = React.useState('codicon-diff-added')
     const dispatch = useAppDispatch();
     const deleteHandler = () => {
         dispatch(deleteCell(props.hash));
@@ -54,7 +56,7 @@ export function CellToolbar(props: CellToolbarProps) {
     const editHandler = () => {
         if (isEditing) {
             vscode.postMessage({
-                command: "edit snapshot",
+                command: "finish editing",
                 id: props.hash,
                 index: props.index
             });
@@ -62,7 +64,7 @@ export function CellToolbar(props: CellToolbarProps) {
         }
         else {
             vscode.postMessage({
-                command: "revert snapshot",
+                command: "start editing",
                 id: props.hash,
             });
             dispatch(updateActiveEdit(findIndex()));
@@ -80,7 +82,22 @@ export function CellToolbar(props: CellToolbarProps) {
         return target;
     };
 
-    return <div style={{overflow: 'auto'}}>
+    const switchView = () => {
+        let style = props.switchStyle();
+        switch (style) {
+            case 0:
+                setStyleIcon('codicon-code');
+                break;
+            case 1:
+                setStyleIcon('codicon-diff-removed');
+                break;
+            case 2:
+                setStyleIcon('codicon-diff-added');
+                break;
+        }
+    }
+
+    return <div style={{ overflow: 'auto' }}>
         <ul className='toolbar-wrapper' id={`toolbar-wrapper-${props.hash}`}>
             {!props.mdOnly &&
                 <li className='wrapper-button' onClick={revertHandler}><i className="codicon codicon-file-code"></i></li>
@@ -88,7 +105,9 @@ export function CellToolbar(props: CellToolbarProps) {
             {!props.mdOnly &&
                 <li className='wrapper-button' onClick={editHandler}><i className={activeEdit === findIndex() ? "codicon codicon-save-as" : "codicon codicon-edit"}></i></li>
             }
-            {/* <li className='wrapper-button toggle-button' onClick={toggleHandler}></li> */}
+            {!props.mdOnly &&
+                <li className='wrapper-button' onClick={switchView}><i className={`codicon ${styleIcon}`}></i></li>
+            }
             <li className='wrapper-button' onClick={moveUpHandler}><i className="codicon codicon-arrow-up"></i></li>
             <li className='wrapper-button' onClick={moveDownHandler}><i className="codicon codicon-arrow-down"></i></li>
             <li className='wrapper-button' onClick={deleteHandler}><i className="codicon codicon-trash"></i></li>

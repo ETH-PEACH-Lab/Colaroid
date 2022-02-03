@@ -12,30 +12,37 @@ import { propTypes } from 'react-bootstrap/esm/Image';
 export interface CellProps {
     content: CellData,
     index: number,
-    cstyle: number,
     mdOnly: boolean
 }
 export function Cell(props: CellProps) {
+    const [style, setStyle] = React.useState(2);
+    const switchStyle = () => {
+        const newStyle = (style + 1) % 3;
+        setStyle(newStyle);
+        return newStyle;
+    }
+
     const activeEdit = useAppSelector(selectActiveEdit);
-    return <div className={props.index===activeEdit?`cell-wrapper selectedwrapper`:`cell-wrapper`} id={`cell-wrapper-${props.content.hash}`}>
+    return <div className={props.index === activeEdit ? `cell-wrapper selectedwrapper` : `cell-wrapper`} id={`cell-wrapper-${props.content.hash}`}>
+        <CellMDEditor content={props.content} index={props.index} mdOnly={props.mdOnly} />
+
         {isExtension &&
-                <CellToolbar hash={props.content.hash} index={props.index} mdOnly={props.mdOnly}/>
+            <CellToolbar hash={props.content.hash} index={props.index} mdOnly={props.mdOnly} switchStyle={switchStyle} />
         }
-        <CellMDEditor content={props.content} index={props.index} cstyle={props.cstyle} mdOnly={props.mdOnly}/>
-        {!props.mdOnly && 
-        <>
-        {props.cstyle === 0 &&
-            <CellCodeEditor content={props.content} index={props.index} cstyle={props.cstyle} mdOnly={props.mdOnly}/>
+        {!props.mdOnly &&
+            <>
+                {style === 0 &&
+                    <CellCodeEditor content={props.content} index={props.index} mdOnly={props.mdOnly} />
+                }
+                {style === 1 &&
+                    <CellCodeEditorV2 content={props.content} index={props.index} mdOnly={props.mdOnly} />
+                }
+                {style === 2 &&
+                    <CellCodeEditorV3 content={props.content} index={props.index} mdOnly={props.mdOnly} />
+                }
+                <Output content={props.content} index={props.index} mdOnly={props.mdOnly} />
+            </>
         }
-        {props.cstyle === 1 &&
-            <CellCodeEditorV2 content={props.content} index={props.index} cstyle={props.cstyle} mdOnly={props.mdOnly}/>
-        }
-        {props.cstyle === 2 &&
-            <CellCodeEditorV3 content={props.content} index={props.index} cstyle={props.cstyle} mdOnly={props.mdOnly}/>
-        }
-        <Output content={props.content} index={props.index} cstyle={props.cstyle} mdOnly={props.mdOnly}/>
-        </>
-        }
-        
+
     </div>;
 }

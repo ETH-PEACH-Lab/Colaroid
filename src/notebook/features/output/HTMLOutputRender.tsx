@@ -22,11 +22,39 @@ export const HTMLOutputRender = (props: CellProps) => {
         let iframeEle = iframeWrapperRef.current.childNodes[0] as HTMLIFrameElement;
         iframeEle.addEventListener('load', onOutputLoad);
         let iframeDoc = iframeEle.contentDocument;
-        console.log('yes iframe', iframeDoc.baseURI)
+        const processedHTML = processDocument();
         iframeDoc.open();
-        iframeDoc.writeln(item.content);
+        iframeDoc.writeln(processedHTML);
         iframeDoc.close();
+        processDocument();
     }, [props.content]);
+
+    const processDocument = () => {
+        const htmlDocuments = props.content.result.filter((e)=> e.format === 'html');
+        let mainHTMLDocument = htmlDocuments[0]?.content;
+        
+        // match the script name
+        const jsRegex = /<script src=(.*.js?).><\/script>/g
+        const cssRegex = /<link rel=.stylesheet.* href=(.*\.css?).>/g;
+        const jsResults = [...mainHTMLDocument.matchAll(jsRegex)];
+        jsResults.forEach(line => {
+            const jsLine = line[0];
+            const fileName = line[1].replace(/"|\\/g, '');
+            const jsDocument = props.content.result.filter((e) => e.title === fileName);
+            const jsDocumentContent = jsDocument[0]?.content;
+            mainHTMLDocument = mainHTMLDocument.replace(jsLine, `<script>${jsDocumentContent}</script>`);
+        });
+
+        const cssResults = [...mainHTMLDocument.matchAll(cssRegex)];
+        cssResults.forEach(line => {
+            const cssLine = line[0];
+            const fileName = line[1].replace(/"|\\/g, '');
+            const cssDocument = props.content.result.filter((e) => e.title === fileName);
+            const cssDocumentContent = cssDocument[0]?.content;
+            mainHTMLDocument = mainHTMLDocument.replace(cssLine, `<style>${cssDocumentContent}</style>`);
+        });
+        return mainHTMLDocument;
+    };
 
     const onOutputLoad = (e) => {
         setIframeDocument(e.target.contentWindow.document.body);

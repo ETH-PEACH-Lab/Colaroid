@@ -72,6 +72,7 @@
 		"@reduxjs/toolkit": "^1.6.2",
 		"@vscode/codicons": "^0.0.26",
 		"bootstrap": "^5.1.3",
+		"diff": "^5.0.0",
 		"monaco-editor-webpack-plugin": "^6.0.0",
 		"parse-git-diff": "^0.0.6",
 		"react": "^17.0.2",
