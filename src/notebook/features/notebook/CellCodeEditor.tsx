@@ -1,10 +1,11 @@
 import * as React from 'react';
 import MonacoEditor, { EditorConstructionOptions, MonacoDiffEditor } from 'react-monaco-editor';
 import { CellProps } from "./Cell";
-import { Row, Col, Container } from 'react-bootstrap';
+import { Row, Col, Badge } from 'react-bootstrap';
 import { getLanguage } from '../../utils';
 import { useAppSelector } from '../../app/hooks';
 import { selectContent } from './notebookSlice';
+import * as Diff from 'diff';
 
 export function CellCodeEditor(props: CellProps) {
     const [currentFileIndex, setCurrentFileIndex] = React.useState(0);
@@ -28,7 +29,9 @@ export function CellCodeEditor(props: CellProps) {
     };
 
     const getOriginalContent = () => {
-        const files = content[props.index - 1].result;
+        let oldIndex = props.index - 1
+        while (oldIndex >= 0 && content[oldIndex].hash === '') oldIndex = oldIndex - 1;
+        const files = content[oldIndex].result;
         let match = '';
         files.forEach(file => {
             if (file.title === props.content.result[currentFileIndex].title) {
@@ -41,12 +44,29 @@ export function CellCodeEditor(props: CellProps) {
     const editorDidMount = (editor) => {
         editor.onDidUpdateDiff(() => {
             const changes = editor.getLineChanges();
-				if(changes.length > 0){					
-					const startNumber = changes[0].originalStartLineNumber;
-					editor.revealLineNearTop(startNumber);
-				}
+            if (changes.length > 0) {
+                const startNumber = changes[0].originalStartLineNumber;
+                editor.revealLineNearTop(startNumber);
+            }
         });
     };
+
+    const computeChanges = (fileIndex) => {
+        const newFile = props.content.result[fileIndex];
+        let oldIndex = props.index - 1;
+        while (oldIndex >= 0 && content[oldIndex].hash === '') {
+            oldIndex = oldIndex - 1;
+        }
+        if (oldIndex <= 0) return '';
+        const oldResult = content[oldIndex].result;
+        const oldFiles = oldResult.filter((e) => e.title === newFile.title);
+        if (oldFiles.length === 0) return 'new';
+        const oldFile = oldFiles[0];
+        const diff = Diff.diffLines(newFile.content, oldFile.content);
+        const validDiff = diff.filter(e => e.added | e.removed)
+        if (validDiff.length === 0) return '';
+        return validDiff.length.toString();
+    }
 
     return <div>
         <Row className="code-cell-wrapper" id={`code-cell-wrapper-${props.content.hash}`}>
@@ -55,7 +75,8 @@ export function CellCodeEditor(props: CellProps) {
                 <ul>
                     {props.content.result.map((item, index) =>
                         <li key={index} onClick={() => { switchFileIndex(index) }}>
-                            {item.title}
+                            {item.title}    <Badge pill bg="warning" text="dark">
+                                {computeChanges(index)}</Badge>
                         </li>
                     )}
                 </ul>

@@ -159,6 +159,7 @@ export class ColaroidNotebookPanel {
 				this.content.push(data);
 				saveLocalDoc(this.path, this.content);
 				this.appendCell(data);
+				vscode.window.showInformationMessage("New cell is added.");
 			});
 		}
 		if (message.command === "revise message") {
@@ -175,6 +176,7 @@ export class ColaroidNotebookPanel {
 			});
 			this.content.splice(index, 1);
 			saveLocalDoc(this.path, this.content);
+			vscode.window.showInformationMessage("The cell is removed.");
 		}
 
 		if (message.command === "move up cell") {
@@ -203,8 +205,14 @@ export class ColaroidNotebookPanel {
 			}
 		if (message.command === "revert snapshot") {
 			this.gitService.revertGit(message.id);
+			vscode.window.showInformationMessage("The current step is displayed in the code editor.");
+
 		}
-		if (message.command === "edit snapshot") {
+		if (message.command === "start editing") {
+			this.gitService.revertGit(message.id);
+			vscode.window.showInformationMessage("You can edit the current step in the file editor. Press the save button in the notebook when you finish editing.");
+		}
+		if (message.command === "finish editing") {
 			this.gitService.createGitCommit('edit snapshot').then((result) => {
 				if(result.commit !== ''){
 					let content = this.content[message.index];
@@ -213,6 +221,9 @@ export class ColaroidNotebookPanel {
 					saveLocalDoc(this.path, this.content);
 					this.refresh();
 				}
+				vscode.window.showInformationMessage("Your edits are saved. The file editor is now switching to the latest version.");
+
+				this.gitService.revertGit(this.content[this.content.length-1].hash);
 			});	
 		}
 		if (message.command === "save recording") {
@@ -222,6 +233,8 @@ export class ColaroidNotebookPanel {
 			});
 			this.content[index].recording = message.content;
 			saveLocalDoc(this.path, this.content);
+			vscode.window.showInformationMessage("Recording is saved.");
+
 		}
 		if (message.command === "export state") {
 			console.log('export state')
