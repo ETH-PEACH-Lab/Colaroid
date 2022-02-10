@@ -4,11 +4,12 @@ import { CellProps } from "./Cell";
 import { Row, Col, Badge } from 'react-bootstrap';
 import { getLanguage } from '../../utils';
 import { useAppSelector } from '../../app/hooks';
-import { selectContent } from './notebookSlice';
+import { selectActiveEdit, selectContent } from './notebookSlice';
 import * as Diff from 'diff';
 
 export function CellCodeEditorV2(props: CellProps) {
     const [currentFileIndex, setCurrentFileIndex] = React.useState(0);
+    const activeEdit = useAppSelector(selectActiveEdit);
     let editor = null;
     let changes = [];
     const content = useAppSelector(selectContent);
@@ -33,7 +34,7 @@ export function CellCodeEditorV2(props: CellProps) {
     const getOriginalContent = () => {
         let oldIndex = props.index - 1
         while (oldIndex >= 0 && content[oldIndex].hash === '') oldIndex = oldIndex - 1;
-        const files = content[oldIndex].result;        
+        const files = content[oldIndex].result;
         let match = '';
         files.forEach(file => {
             if (file.title === props.content.result[currentFileIndex].title) {
@@ -41,6 +42,15 @@ export function CellCodeEditorV2(props: CellProps) {
             }
         });
         return match;
+    };
+    const findIndex = () => {
+        let target;
+        content.forEach((e, index) => {
+            if (e.hash === props.content.hash) {
+                target = index;
+            }
+        });
+        return target;
     };
 
     const diffEditorDidMount = (myeditor, monaco) => {
@@ -60,7 +70,7 @@ export function CellCodeEditorV2(props: CellProps) {
         // todo: add a red mark when lines are deleted
         if (myeditor && (mychanges.length > 0)) {
             mychanges.forEach(mychange => {
-                if(mychange.modifiedStartLineNumber < mychange.modifiedEndLineNumber) {
+                if (mychange.modifiedStartLineNumber < mychange.modifiedEndLineNumber) {
                     myeditor.deltaDecorations(
                         [],
                         [
@@ -110,32 +120,40 @@ export function CellCodeEditorV2(props: CellProps) {
             </Col>
 
             <Col xs={10} className="code-cell" id={`code-cell-${props.content.hash}`} style={{ height: '250px' }}>
-                {props.index === 0 ?
-                    <MonacoEditor
-                        value={props.content.result[currentFileIndex].content}
-                        options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                        theme="vs-dark"
-                        language={getLanguage(props.content.result[currentFileIndex].format)}
-                    />
-                    :
-                    <div style={{ height: '250px' }}>
-                        <MonacoEditor
-                            value={props.content.result[currentFileIndex].content}
-                            options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                            theme="vs-dark"
-                            language={getLanguage(props.content.result[currentFileIndex].format)}
-                            editorDidMount={editorDidMount}
-                        />
-                        <div style={{ display: "none" }}>                    <MonacoDiffEditor
-                            language={getLanguage(props.content.result[currentFileIndex].format)}
-                            options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                            theme="vs-dark"
-                            original={getOriginalContent()}
-                            value={props.content.result[currentFileIndex].content}
-                            editorDidMount={diffEditorDidMount}
-                        /></div>
-                    </div>
+                {
+                    activeEdit === findIndex() ?
+                        <div className="edit-in-progress">Please edit the current step in the code editor.</div>
+                        :
+                        <>
+                            {props.index === 0 ?
+                                <MonacoEditor
+                                    value={props.content.result[currentFileIndex].content}
+                                    options={{ ...options, readOnly: true } as EditorConstructionOptions}
+                                    theme="vs-dark"
+                                    language={getLanguage(props.content.result[currentFileIndex].format)}
+                                />
+                                :
+                                <div style={{ height: '250px' }}>
+                                    <MonacoEditor
+                                        value={props.content.result[currentFileIndex].content}
+                                        options={{ ...options, readOnly: true } as EditorConstructionOptions}
+                                        theme="vs-dark"
+                                        language={getLanguage(props.content.result[currentFileIndex].format)}
+                                        editorDidMount={editorDidMount}
+                                    />
+                                    <div style={{ display: "none" }}>                    <MonacoDiffEditor
+                                        language={getLanguage(props.content.result[currentFileIndex].format)}
+                                        options={{ ...options, readOnly: true } as EditorConstructionOptions}
+                                        theme="vs-dark"
+                                        original={getOriginalContent()}
+                                        value={props.content.result[currentFileIndex].content}
+                                        editorDidMount={diffEditorDidMount}
+                                    /></div>
+                                </div>
+                            }
+                        </>
                 }
+
 
             </Col>
         </Row>

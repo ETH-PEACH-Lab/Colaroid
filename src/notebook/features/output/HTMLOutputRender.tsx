@@ -30,9 +30,9 @@ export const HTMLOutputRender = (props: CellProps) => {
     }, [props.content]);
 
     const processDocument = () => {
-        const htmlDocuments = props.content.result.filter((e)=> e.format === 'html');
+        const htmlDocuments = props.content.result.filter((e) => e.format === 'html');
         let mainHTMLDocument = htmlDocuments[0]?.content;
-        
+
         // match the script name
         const jsRegex = /<script src=(.*.js?).><\/script>/g
         const cssRegex = /<link rel=.stylesheet.* href=(.*\.css?).>/g;

@@ -4,11 +4,13 @@ import { CellProps } from "./Cell";
 import { Row, Col, Badge } from 'react-bootstrap';
 import { getLanguage } from '../../utils';
 import { useAppSelector } from '../../app/hooks';
-import { selectContent } from './notebookSlice';
+import { selectActiveEdit, selectContent } from './notebookSlice';
 import * as Diff from 'diff';
 
 export function CellCodeEditor(props: CellProps) {
     const [currentFileIndex, setCurrentFileIndex] = React.useState(0);
+    const activeEdit = useAppSelector(selectActiveEdit);
+
     const content = useAppSelector(selectContent);
 
     const switchFileIndex = (index) => {
@@ -68,6 +70,16 @@ export function CellCodeEditor(props: CellProps) {
         return validDiff.length.toString();
     }
 
+    const findIndex = () => {
+        let target;
+        content.forEach((e, index) => {
+            if (e.hash === props.content.hash) {
+                target = index;
+            }
+        });
+        return target;
+    };
+
     return <div>
         <Row className="code-cell-wrapper" id={`code-cell-wrapper-${props.content.hash}`}>
             <Col xs={2} className="title-list-wrapper">
@@ -83,24 +95,33 @@ export function CellCodeEditor(props: CellProps) {
             </Col>
 
             <Col xs={10} className="code-cell" id={`code-cell-${props.content.hash}`} style={{ height: '250px' }}>
-                {props.index === 0 ?
-                    <MonacoEditor
-                        value={props.content.result[currentFileIndex].content}
-                        options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                        theme="vs-dark"
-                        language={getLanguage(props.content.result[currentFileIndex].format)}
-                    />
+                {activeEdit === findIndex() ?
+                    <div className="edit-in-progress">Please edit the current step in the code editor.</div>
                     :
-                    <MonacoDiffEditor
-                        language={getLanguage(props.content.result[currentFileIndex].format)}
-                        options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                        theme="vs-dark"
-                        original={getOriginalContent()}
-                        value={props.content.result[currentFileIndex].content}
-                        editorDidMount={editorDidMount}
-                    />
+                    <div>
+                        {props.index === 0 ?
+                            <MonacoEditor
+                                value={props.content.result[currentFileIndex].content}
+                                options={{ ...options, readOnly: true } as EditorConstructionOptions}
+                                theme="vs-dark"
+                                language={getLanguage(props.content.result[currentFileIndex].format)}
+                            />
+                            :
+                            <MonacoDiffEditor
+                                language={getLanguage(props.content.result[currentFileIndex].format)}
+                                options={{ ...options, readOnly: true } as EditorConstructionOptions}
+                                theme="vs-dark"
+                                original={getOriginalContent()}
+                                value={props.content.result[currentFileIndex].content}
+                                editorDidMount={editorDidMount}
+                            />
+                        }
+                    </div>
                 }
             </Col>
         </Row>
     </div>;
+
+
+
 }
