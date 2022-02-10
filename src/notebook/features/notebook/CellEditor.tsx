@@ -4,10 +4,16 @@ import { CellProps } from "./Cell";
 import { Row, Col, Badge } from 'react-bootstrap';
 import { getLanguage } from '../../utils';
 import { useAppSelector } from '../../app/hooks';
-import { selectActiveEdit, selectContent } from './notebookSlice';
+import { CellData, selectActiveEdit, selectContent } from './notebookSlice';
 import * as Diff from 'diff';
-
-export function CellCodeEditor(props: CellProps) {
+import { CellCodeDiff } from './CellCodeDiff';
+export interface CellEditorProps {
+    content: CellData,
+    index: number,
+    mdOnly: boolean,
+    style: number
+}
+export function CellEditor(props: CellEditorProps) {
     const [currentFileIndex, setCurrentFileIndex] = React.useState(0);
     const activeEdit = useAppSelector(selectActiveEdit);
 
@@ -43,23 +49,13 @@ export function CellCodeEditor(props: CellProps) {
         return match;
     };
 
-    const editorDidMount = (editor) => {
-        editor.onDidUpdateDiff(() => {
-            const changes = editor.getLineChanges();
-            if (changes.length > 0) {
-                const startNumber = changes[0].originalStartLineNumber;
-                editor.revealLineNearTop(startNumber);
-            }
-        });
-    };
-
     const computeChanges = (fileIndex) => {
         const newFile = props.content.result[fileIndex];
         let oldIndex = props.index - 1;
         while (oldIndex >= 0 && content[oldIndex].hash === '') {
             oldIndex = oldIndex - 1;
         }
-        if (oldIndex <= 0) return '';
+        if (oldIndex < 0) return '';
         const oldResult = content[oldIndex].result;
         const oldFiles = oldResult.filter((e) => e.title === newFile.title);
         if (oldFiles.length === 0) return 'new';
@@ -94,11 +90,11 @@ export function CellCodeEditor(props: CellProps) {
                 </ul>
             </Col>
 
-            <Col xs={10} className="code-cell" id={`code-cell-${props.content.hash}`} style={{ height: '250px' }}>
+            <Col xs={10} className="code-cell" id={`code-cell-${props.content.hash}`} >
                 {activeEdit === findIndex() ?
                     <div className="edit-in-progress">Please edit the current step in the code editor.</div>
                     :
-                    <div>
+                    <div style={{height: '250px'}}>
                         {props.index === 0 ?
                             <MonacoEditor
                                 value={props.content.result[currentFileIndex].content}
@@ -107,14 +103,7 @@ export function CellCodeEditor(props: CellProps) {
                                 language={getLanguage(props.content.result[currentFileIndex].format)}
                             />
                             :
-                            <MonacoDiffEditor
-                                language={getLanguage(props.content.result[currentFileIndex].format)}
-                                options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                                theme="vs-dark"
-                                original={getOriginalContent()}
-                                value={props.content.result[currentFileIndex].content}
-                                editorDidMount={editorDidMount}
-                            />
+                            <CellCodeDiff language={getLanguage(props.content.result[currentFileIndex].format)} style={props.style} original={getOriginalContent()} current={props.content.result[currentFileIndex].content}></CellCodeDiff>
                         }
                     </div>
                 }

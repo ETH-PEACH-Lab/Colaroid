@@ -168,7 +168,7 @@ header {
 	display: inline;
     align-items: center;
     justify-content: center;
-	padding: 5px;
+	padding: 3px 5px;
 }
 .wrapper-progress{
 	width: 150px;

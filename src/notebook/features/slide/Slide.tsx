@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Col, Pagination, Row } from 'react-bootstrap';
 import MarkdownView from 'react-showdown';
 import { useAppSelector } from '../../app/hooks';
-import { CellCodeEditor } from '../notebook/CellCodeEditor';
+import { CellEditor } from '../notebook/CellEditor';
 import { selectContent } from '../notebook/notebookSlice';
 import { Output } from '../output/Output';
 
@@ -44,10 +44,10 @@ export function Slide(props) {
                     </div>
                 </Col>
                 <Col sm={8}>
-                    <CellCodeEditor content={content[currentIndex]} index={currentIndex} mdOnly={false} />
+                    <CellEditor content={content[currentIndex]} index={currentIndex} mdOnly={false} style={0}/>
                     <Output content={content[currentIndex]} index={currentIndex} mdOnly={false}></Output>
                 </Col>
             </Row>
         </div>
-    </div>
+    </div>;
 }
