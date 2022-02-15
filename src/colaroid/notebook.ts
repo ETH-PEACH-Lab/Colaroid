@@ -146,11 +146,12 @@ export class ColaroidNotebookPanel {
         `;
 	}
 
-	private handleMessage(message) {
+	private async handleMessage(message) {
 		if (message.command === "ready") {
 			this.initMessage();
 		}
 		if (message.command === "add") {
+			await this.saveFiles();
 			this.gitService.createGitCommit(message.content).then((result) => {
 				const data = {
 					message: message.content,
@@ -213,6 +214,7 @@ export class ColaroidNotebookPanel {
 			vscode.window.showInformationMessage("You can edit the current step in the file editor. Press the save button in the notebook when you finish editing.");
 		}
 		if (message.command === "finish editing") {
+			await this.saveFiles();
 			this.gitService.createGitCommit('edit snapshot').then((result) => {
 				if(result.commit !== ''){
 					let content = this.content[message.index];
@@ -241,6 +243,11 @@ export class ColaroidNotebookPanel {
 			saveState(path.join(this.extensionUri.path, "dist", "state", "state.json"), message.content)
 		}
 	}
+
+	private saveFiles = async () => {
+		await vscode.commands.executeCommand('workbench.action.files.saveAll');
+		return;
+	};
 }
 
 

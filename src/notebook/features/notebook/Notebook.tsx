@@ -17,16 +17,7 @@ export function Notebook() {
             command: "export state"
         });
     };
-    return <div>
-        <ButtonGroup id="notebook-toolbar">
-        {/* <DropdownButton title="Notebook Style" className="notebook-toolbar-btn">
-            <Dropdown.Item as="button"  onClick={() => { setNotebookView(0)}}>Article View</Dropdown.Item>
-            <Dropdown.Item as="button" onClick={() => { setNotebookView(1)}}>Slide View</Dropdown.Item>
-        </DropdownButton> */}
-        {isExtension &&
-                <Button className="notebook-toolbar-btn" onClick={exportNotebook}>Export</Button>
-        }
-        </ButtonGroup>
+    return <div className="notebook-container">
         {notebookView === 0?
         <div>
         {content.map((cell, index) => 

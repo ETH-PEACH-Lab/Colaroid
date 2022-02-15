@@ -30,9 +30,9 @@ export const HTMLOutputRender = (props: CellProps) => {
     }, [props.content]);
 
     const processDocument = () => {
-        const htmlDocuments = props.content.result.filter((e)=> e.format === 'html');
+        const htmlDocuments = props.content.result.filter((e) => e.format === 'html');
         let mainHTMLDocument = htmlDocuments[0]?.content;
-        
+
         // match the script name
         const jsRegex = /<script src=(.*.js?).><\/script>/g
         const cssRegex = /<link rel=.stylesheet.* href=(.*\.css?).>/g;
@@ -213,8 +213,8 @@ export const HTMLOutputRender = (props: CellProps) => {
 
     const drawEvent = (event, fakeCursor: HTMLDivElement) => {
         if (event.type === "click" || event.type === "mousemove") {
-            fakeCursor.style.top = event.y.toString() + 'px'
-            fakeCursor.style.left = event.x.toString() + 'px'
+            fakeCursor.style.top = event.y.toString() + 'px';
+            fakeCursor.style.left = event.x.toString() + 'px';
         }
 
         if (event.type === "click") {
@@ -224,39 +224,40 @@ export const HTMLOutputRender = (props: CellProps) => {
             var clickEvent = document.createEvent("MouseEvents");
             clickEvent.initMouseEvent("click", true, true, window, 1, 0, 0, 0, 0,
                 false, false, false, false, 0, null);
-            target.dispatchEvent(clickEvent)
+            if(target) target.dispatchEvent(clickEvent);
         }
     };
     const flashClass = (el: HTMLElement, className) => {
-        el?.classList?.add(className)
+        el?.classList?.add(className);
         setTimeout(() => {
             el?.classList?.remove(className);
         }, 200);
     };
     const reload = () => {
-        iframeWrapperRef.current.innerHTML = '<iframe> <iframe/>';
+        iframeWrapperRef.current.innerHTML = '<iframe class="output-wrapper"> <iframe/>';
         let iframeEle = iframeWrapperRef.current.childNodes[0] as HTMLIFrameElement;
         iframeEle.addEventListener('load', onOutputLoad);
         let iframeDoc = iframeEle.contentDocument;
+        const processedHTML = processDocument();
         iframeDoc.open();
-        iframeDoc.writeln(item.content);
+        iframeDoc.writeln(processedHTML);
         iframeDoc.close();
     };
 
     return <div>
         <div className="preview-cell-wrapper" id={`preview-cell-wrapper-${props.content.hash}`}>
-            <div>
+            <div className="toolbar-container">
                 <ul className='toolbar-wrapper'>
-                    <li className='wrapper-button' onClick={reload}><i className="codicon codicon-refresh"></i></li>
+                    <li className='wrapper-button' onClick={reload} title="Refresh"><i className="codicon codicon-refresh"></i></li>
                     {isExtension &&
-                        <li className='wrapper-button' onClick={handleRecord} ref={recordRef}><i className="codicon codicon-record"></i></li>
+                        <li className='wrapper-button' onClick={handleRecord} ref={recordRef} title="Record"><i className="codicon codicon-record"></i></li>
                     }
-                    <li className='wrapper-button' onClick={startPlay} ref={playRef}><i className="codicon codicon-play"></i></li>
+                    <li className='wrapper-button' onClick={startPlay} ref={playRef} title="Play the Recording"><i className="codicon codicon-play"></i></li>
                     <li className='wrapper-progress' ><ProgressBar now={progress} /></li>
                 </ul>
             </div>
             <div id="wrapper" ref={iframeWrapperRef}>
-                <iframe></iframe>
+                <iframe className="output-wrapper"></iframe>
             </div>
         </div>
     </div>;
