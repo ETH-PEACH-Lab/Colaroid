@@ -1,12 +1,12 @@
-:root {
-	--cellbg: #252526;
-	--btncolor: rgb(197,197,197);
-}
 body{
 	background: var(--vscode-editor-background);
 	color: var(--vscode-editor-foreground);
 	font-size: var(--vscode-editor-font-size)!important;
 	font-weight: var(--vscode-editor-font-weight)!important;
+	padding: 0px;
+}
+body * :focus{
+	outline-color: var(--vscode-focusBorder);
 }
 
 h1{
@@ -29,15 +29,21 @@ h4{
 #snapshot-input {
 	width: calc(100% - 8px);
 	display: block;
-	background-color: var(--cellbg);
-	color: #eee;
-	height: 40px;
-	outline: solid 1px #37373d;
+	background-color: var(--vscode-input-background);
+	color: var(--vscode-input-foreground);
+	height: 80px;
+	border: none;
+	padding: 6px;
+	font-size:13px;
+}
+
+#snapshot-input:focus {
+outline-color: var(--vscode-focusBorder);
 }
 
 .title-list-wrapper{
-	background: #222;
-	color: #eee;
+	background:var(--vscode-editorWidget-background);
+	color: var(--vscode-editorWidget-foreground);
 	font-size: 12px;
 	padding: 0px;
 }
@@ -45,6 +51,7 @@ h4{
 .title-list-title {
 	font-weight: bold;
 	padding: 4px 2px 4px 8px;
+	background-color: var(--vscode-panelSectionHeader-background);
 }
 
 .title-list-wrapper ul {
@@ -58,11 +65,11 @@ h4{
 }
 
 .title-list-wrapper li:hover {
-	background:#333;
+	background:var(--vscode-list-hoverBackground);
 }
 
 .title-list-wrapper .selected {
-	background: #444;
+	background: var(--vscode-list-activeSelectionBackground);
 }
 
 button,
@@ -77,10 +84,18 @@ button:active {
 }
 
 .instruction-btn {
-	background: transparent;
-	color: #4e94ce;
+	background: var(--vscode-button-background);
+	color: var(--vscode-button-foreground);
 	margin-top: 4px;
-	display: inline;
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	padding: 4px;
+	width: 150px;
+	margin-right: 30px;
+}
+.button-container{
+	display:inline;
 }
 header {
 	background: #333;
@@ -97,10 +112,20 @@ header {
 }
 .toolbar-wrapper {
 	list-style-type: none;
-	background-color: rgb(30, 30, 30);
-	border: 1px solid rgba(128,128,128,0.35);
 	padding-left:0px;
 	float:right;
+	text-align: center;
+	background-color: #42424285;
+}
+.toolbar-container {
+	position:absolute;
+	right:35px;
+	z-index:400;
+	/* display:none; */
+}
+
+.cell-wrapper:hover .toolbar-container{
+	display:block;
 }
 #notebook-container {
 	margin-top: 80px;
@@ -111,7 +136,7 @@ header {
 } */
 
 .cell-wrapper:hover {
-	background: #222;
+	background: rgba(128,128,128,0.07);
 }
 
 .wrapper-button:hover {
@@ -165,13 +190,14 @@ header {
 	font-weight: 700;
 }
 .wrapper-button {
-	display: inline;
+	display: inline-flex;
     align-items: center;
     justify-content: center;
 	padding: 3px 5px;
+	border-radius: 5px;
 }
 .wrapper-progress{
-	width: 150px;
+	width: 100px;
 	margin: auto;
 }
 .wrapper-button::before {
@@ -181,7 +207,7 @@ header {
 }
 .progress{
 	height: 0.2rem !important;
-	background-color: #484848;
+	background-color: var(--vscode-badge-background);
 }
 .progress-bar{
 	transition: none;
@@ -197,43 +223,17 @@ header {
 .wrapper-button.stop {
 	color: #5e5e5e;
 }
-.toggle-button {
-	color:var(--btncolor);
-}
-.revert-button{
-	color:var(--btncolor);
-}
+
 .delete-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f2ed";
 }
-
-/* .delete-button::after{
-	content: "Delete"
-} */
-
-.delete-button {
-	color: var(--btncolor);
-}
-
-.moveup-button {
-	color:var(--btncolor);
-}
-/* .moveup-button::after{
-	content: "Move Up"
-} */
 
 .moveup-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f062";
 }
 
-.movedown-button {
-	color:var(--btncolor);
-}
-/* .movedown-button::after{
-	content: "Move Down"
-} */
 .movedown-button::before {
 	font-family: "Font Awesome 5 Free";
 	content: "\f063";
@@ -255,23 +255,23 @@ header {
 
 .cell-wrapper {
 	margin-top: 10px;
-	padding: 5px;
-	border-left:3px solid #222;
+	padding: 5px 15px;
 }
 .cell-wrapper:focus-within{
-	border-left:3px solid rgb(0, 127, 212);
+	outline-color:var(--vscode-panel-border);
 }
 
 iframe {
 	width: 100%;
-	border: 1px solid #37373d;
+	border: solid 1px var(--vscode-panel-border);
 }
 .code-cell-wrapper {
-	outline: solid 1px #37373d;
+	outline: solid 1px var(--vscode-panel-border);
+	width: 100%;
 }
 
 .code-cell-wrapper:focus-within {
-	outline: solid 1px rgb(0, 127, 212);
+	outline: solid 1px var(--vscode-focusBorder);
 }
 
 .md-cell-preview {
@@ -305,17 +305,17 @@ iframe {
 	margin-bottom: 100px;
 }
 .selectedwrapper {
-	background-color: #313131;
+	background-color: var(--vscode-settings-focusedRowBackground);
 	padding:20px 10px;
-	border-left: 2px solid rgb(76, 169, 255);
+	outline: 1px solid var(--vscode-panel-border);
 	margin-bottom: 100px;
 }
 
 .selectedwrapper:hover{
-	background-color: #313131;	
+	background-color: var(--vscode-settings-focusedRowBackground);
 }
 
-.selectedwrapper::before{
+/* .selectedwrapper::before{
 	content: "";
     position: absolute;
     top: 0;
@@ -326,7 +326,7 @@ iframe {
     width: 8px;
     opacity: 0;
     transition: opacity .15s ease-in;
-}
+} */
 .mdlist-wrapper{
 	overflow-y: scroll;
 	height: 80vh;
@@ -341,4 +341,87 @@ iframe {
 	width: 100%;
 	height: 100%;
 	text-align: center;
+}
+
+.output-wrapper {
+	background: white;
+}
+
+.input-box-wrapper {
+	width: 100%;
+	position:fixed;
+	bottom: 0px;
+	z-index: 500;
+	background-color: var(--vscode-editor-background);
+	border-top: 1px solid var(--vscode-panel-border);
+	padding: 5px 10px;
+	color: var(--vscode-foreground);
+}
+
+.pane-title {
+	display:inline;
+	font-weight: bold;
+	margin-left: 5px;
+}
+.pane-content {
+	padding-top: 5px
+}
+
+.notebook-container {
+	padding:20px;
+	padding-bottom:150px;
+}
+
+.start-container {
+	padding: 20px;
+}
+
+.code-cell {
+	padding: 0px;
+}
+
+.dropdown-codeview {
+	background-color: transparent !important;
+	padding: 0px 0px;
+	border: 0px;
+	vertical-align: baseline;
+	border-radius: 5px;
+	color:var(--vscode-editor-foreground) !important;
+}
+
+.dropdown-codeview:hover {
+	background: rgba(90, 93, 94, 0.31);
+}
+.dropdown-codeview:focus{
+	border:0px;
+	box-shadow: none;
+}
+
+.dropdown-codeview:active{
+	background-color: rgba(90, 93, 94, 0.31) !important;
+	border:0px !important;
+	color: var(--vscode-editor-foreground) !important;
+}
+.dropdown-item {
+	border:0px !important;
+	color: var(--vscode-editor-foreground) !important;
+	font-size:12px;
+}
+.dropdown-item:hover {
+	background-color: rgba(90, 93, 94, 0.31) !important;
+	border:0px !important;
+	color: var(--vscode-editor-foreground) !important;
+}
+
+.dropdown-menu {
+	background-color: var(--vscode-activityBar-background);
+	min-width: 0rem !important;
+}
+
+
+.wrapper-dropdown{
+	display: inline-flex;
+    align-items: center;
+    justify-content: center;
+	border-radius: 5px;	
 }

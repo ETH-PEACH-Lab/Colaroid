@@ -7,7 +7,6 @@ interface CellToolbarProps {
     hash: string,
     index: number,
     mdOnly: boolean
-    switchStyle
 }
 export function CellToolbar(props: CellToolbarProps) {
     const content = useAppSelector(selectContent);
@@ -82,33 +81,13 @@ export function CellToolbar(props: CellToolbarProps) {
         return target;
     };
 
-    const switchView = () => {
-        let style = props.switchStyle();
-        switch (style) {
-            case 0:
-                setStyleIcon('codicon-code');
-                break;
-            case 1:
-                setStyleIcon('codicon-diff-removed');
-                break;
-            case 2:
-                setStyleIcon('codicon-diff-added');
-                break;
-        }
-    }
-
-    return <div style={{ overflow: 'auto' }}>
+    return <div className="toolbar-container">
         <ul className='toolbar-wrapper' id={`toolbar-wrapper-${props.hash}`}>
             {/* {!props.mdOnly &&
                 <li className='wrapper-button' onClick={revertHandler}><i className="codicon codicon-file-code"></i></li>
             } */}
-            {!props.mdOnly &&
-                <li className={activeEdit === findIndex() ? "wrapper-button is-edit" : "wrapper-button"} onClick={editHandler} title={activeEdit === findIndex() ? "Save Edits" : "Edit"}><i className={activeEdit === findIndex() ? "codicon codicon-save-as" : "codicon codicon-edit"}></i></li>
-            }
-            {!props.mdOnly &&
-                <li className='wrapper-button' onClick={switchView} title="Switch View"><i className={`codicon ${styleIcon}`}></i></li>
-            }
             <li className='wrapper-button' onClick={moveUpHandler} title="Move Up"><i className="codicon codicon-arrow-up"></i></li>
+
             <li className='wrapper-button' onClick={moveDownHandler} title="Move Down"><i className="codicon codicon-arrow-down" ></i></li>
             <li className='wrapper-button' onClick={deleteHandler} title="Delete"><i className="codicon codicon-trash"></i></li>
 

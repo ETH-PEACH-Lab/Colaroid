@@ -44,7 +44,7 @@ export function Slide(props) {
                     </div>
                 </Col>
                 <Col sm={8}>
-                    <CellEditor content={content[currentIndex]} index={currentIndex} mdOnly={false} style={0}/>
+                    <CellEditor content={content[currentIndex]} index={currentIndex} mdOnly={false} />
                     <Output content={content[currentIndex]} index={currentIndex} mdOnly={false}></Output>
                 </Col>
             </Row>

@@ -17,7 +17,7 @@ export function Notebook() {
             command: "export state"
         });
     };
-    return <div>
+    return <div className="notebook-container">
         {notebookView === 0?
         <div>
         {content.map((cell, index) => 
