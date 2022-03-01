@@ -39,11 +39,11 @@ export function InputBox() {
                 <button className="instruction-btn" id="snapshot-btn" onClick={createSnapshot}>
                     <i className="codicon codicon-pencil" style={{marginRight:'5px'}}></i>  Insert a Snapshot
                 </button>
-                {isExtension &&
+                {/* {isExtension &&
                         <button className="instruction-btn" id="export-btn" onClick={exportNotebook}>
                             <i className="codicon codicon-go-to-file" style={{marginRight: '5px'}}></i>  Export Notebook
                         </button>
-                }
+                } */}
             </div>
             </div>
         }

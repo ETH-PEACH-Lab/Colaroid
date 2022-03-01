@@ -72,7 +72,7 @@ export class ColaroidNotebookPanel {
 
 	private async init() {
 		// init the notebook
-		this.panel.title = "New Notebook";
+		this.panel.title = "Colaroid Notebook";
 		this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
 	}
 

@@ -3,7 +3,7 @@
 	"displayName": "Colaroid",
 	"description": "Document code changes and create computational narratives",
 	"publisher": "LittleAprilFool",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"repository": "https://github.com/LittleAprilFool/Colaroid",
 	"engines": {
 		"vscode": "^1.54.0"
@@ -20,7 +20,7 @@
 		"commands": [
 			{
 				"command": "colaroid.create",
-				"title": "Create Notebook",
+				"title": "Open Notebook",
 				"category": "Colaroid"
 			},
 			{
