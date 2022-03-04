@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { GitService } from "./gitService";
-import { getNonce, getWebviewOptions, readLocalDoc, saveLocalDoc, saveState } from "./utils";
+import {
+	getNonce,
+	getWebviewOptions,
+	readLocalDoc,
+	saveLocalDoc,
+	saveState,
+} from "./utils";
 
 export class ColaroidNotebookPanel {
 	/**
@@ -21,7 +27,9 @@ export class ColaroidNotebookPanel {
 	public static display(extensionUri: vscode.Uri, path: string) {
 		// If we already have a panel, show it
 		if (ColaroidNotebookPanel.currentPanel) {
-			ColaroidNotebookPanel.currentPanel.panel.reveal(vscode.ViewColumn.Two);
+			ColaroidNotebookPanel.currentPanel.panel.reveal(
+				vscode.ViewColumn.Two
+			);
 			return;
 		}
 
@@ -57,7 +65,7 @@ export class ColaroidNotebookPanel {
 
 		// Listen for when the panel is disposed
 		// This happens when the user closes the panel
-		this.panel.onDidDispose(()=>{
+		this.panel.onDidDispose(() => {
 			this.disposables;
 			ColaroidNotebookPanel.currentPanel = undefined;
 		});
@@ -76,7 +84,7 @@ export class ColaroidNotebookPanel {
 		this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
 	}
 
-	private async initMessage(){
+	private async initMessage() {
 		for (const data of this.content) {
 			const { hash, message, recording } = data;
 			const result = await this.gitService.retrieveGitCommit(hash);
@@ -103,8 +111,13 @@ export class ColaroidNotebookPanel {
 		}
 	}
 
-	private getHTMLForDoc(webview: vscode.Webview) {
+	private async scrollToStep(index: number) {
+		setTimeout(() => {
+			this.panel.webview.postMessage({ command: "scroll", index });
+		}, 1000);
+	}
 
+	private getHTMLForDoc(webview: vscode.Webview) {
 		const scriptPathOnDisk = vscode.Uri.file(
 			path.join(this.extensionUri.path, "dist", "notebook.js")
 		);
@@ -114,8 +127,17 @@ export class ColaroidNotebookPanel {
 		const uriBase = webview.asWebviewUri(
 			vscode.Uri.file(`${path.dirname(scriptPathOnDisk.fsPath)}/`)
 		);
-		const codiconsUri = webview.asWebviewUri(vscode.Uri.file(path.join(this.extensionUri.path, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css')));
-
+		const codiconsUri = webview.asWebviewUri(
+			vscode.Uri.file(
+				path.join(
+					this.extensionUri.path,
+					"node_modules",
+					"@vscode/codicons",
+					"dist",
+					"codicon.css"
+				)
+			)
+		);
 
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
@@ -155,16 +177,17 @@ export class ColaroidNotebookPanel {
 			this.gitService.createGitCommit(message.content).then((result) => {
 				const data = {
 					message: message.content,
-					hash: result.commit
+					hash: result.commit,
 				};
 				this.content.push(data);
 				saveLocalDoc(this.path, this.content);
 				this.appendCell(data);
+				this.scrollToStep(this.content.length - 1);
 				vscode.window.showInformationMessage("New cell is added.");
 			});
 		}
 		if (message.command === "revise message") {
-			console.log('revise message received')
+			console.log("revise message received");
 			const index = this.content.findIndex((item, idx) => {
 				return item.hash === message.id;
 			});
@@ -203,54 +226,60 @@ export class ColaroidNotebookPanel {
 				this.content[index]
 			);
 			saveLocalDoc(this.path, this.content);
-			}
+		}
 		if (message.command === "revert snapshot") {
 			this.gitService.revertGit(message.id);
-			vscode.window.showInformationMessage("The current step is displayed in the code editor.");
-
+			vscode.window.showInformationMessage(
+				"The current step is displayed in the code editor."
+			);
 		}
 		if (message.command === "start editing") {
-			this.gitService.revertGit(message.id);
-			vscode.window.showInformationMessage("You can edit the current step in the file editor. Press the save button in the notebook when you finish editing.");
+			this.gitService.prepareEditing(message.id);
+			vscode.window.showInformationMessage(
+				"You can edit the current step in the file editor. Press the save button in the notebook when you finish editing."
+			);
 		}
 		if (message.command === "finish editing") {
 			await this.saveFiles();
-			this.gitService.createGitCommit('edit snapshot').then((result) => {
-				if(result.commit !== ''){
-					let content = this.content[message.index];
-					content.hash = result.commit;
-					this.content[message.index] = content;
-					saveLocalDoc(this.path, this.content);
-					this.refresh();
-				}
-				vscode.window.showInformationMessage("Your edits are saved. The file editor is now switching to the latest version.");
-
-				this.gitService.revertGit(this.content[this.content.length-1].hash);
-			});	
+			let idList = this.content.map((e) => e.hash);
+			this.gitService.rebaseChange(idList, message.id).then((result) => {
+				result.forEach((item, index) => {
+					this.content[index].hash = item;
+				});
+				saveLocalDoc(this.path, this.content);
+				// check out the current fs to the last step
+				this.gitService.checkoutCommit(
+					this.content[this.content.length - 1].hash
+				);
+				this.refresh();
+				this.scrollToStep(message.index);
+			});
 		}
 		if (message.command === "save recording") {
-			console.log('save recording')
+			console.log("save recording");
 			const index = this.content.findIndex((item, idx) => {
 				return item.hash === message.id;
 			});
 			this.content[index].recording = message.content;
 			saveLocalDoc(this.path, this.content);
 			vscode.window.showInformationMessage("Recording is saved.");
-
 		}
 		if (message.command === "export state") {
-			console.log('export state')
-			saveState(path.join(this.extensionUri.path, "dist", "state", "state.json"), message.content)
+			console.log("export state");
+			saveState(
+				path.join(
+					this.extensionUri.path,
+					"dist",
+					"state",
+					"state.json"
+				),
+				message.content
+			);
 		}
 	}
 
 	private saveFiles = async () => {
-		await vscode.commands.executeCommand('workbench.action.files.saveAll');
+		await vscode.commands.executeCommand("workbench.action.files.saveAll");
 		return;
 	};
 }
-
-
-
-
-
