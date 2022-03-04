@@ -24,6 +24,10 @@ export function App() {
                     case "clean":
                         dispatch(cleanContent({}));
                         break;
+                    case "scroll":
+                        let cellsModel = document.querySelectorAll('.cell-wrapper');
+                        cellsModel[event.data.index].scrollIntoView();
+                        break;
                     default:
                         break;
                 }

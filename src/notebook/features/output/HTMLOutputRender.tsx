@@ -23,7 +23,6 @@ export const HTMLOutputRender = (props: CellProps) => {
         iframeEle.addEventListener('load', onOutputLoad);
         let iframeDoc = iframeEle.contentDocument;
         const processedHTML = processDocument();
-        console.log(processedHTML);
         iframeDoc.open();
         iframeDoc.writeln(processedHTML);
         iframeDoc.close();
@@ -38,7 +37,6 @@ export const HTMLOutputRender = (props: CellProps) => {
         const jsRegex = /<script src=(.*\.js?).>\s*<\/script>/g;
         const cssRegex = /<link rel=.stylesheet.* href=(.*\.css?).>/g;
         const jsResults = [...mainHTMLDocument.matchAll(jsRegex)];
-        console.log(jsResults)
         jsResults.forEach(line => {
             const jsLine = line[0];
             const fileName = line[1].replace(/"|\\/g, '');
