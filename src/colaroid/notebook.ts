@@ -248,7 +248,7 @@ export class ColaroidNotebookPanel {
 				});
 				saveLocalDoc(this.path, this.content);
 				// check out the current fs to the last step
-				this.gitService.checkoutCommit(
+				this.gitService.revertGit(
 					this.content[this.content.length - 1].hash
 				);
 				this.refresh();

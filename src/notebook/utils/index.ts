@@ -19,6 +19,6 @@ export const getLanguage = (format) =>{
     return language;
 };
 
-export const isExtension = window.location.href.slice(0, 6) === 'vscode';
-
+// export const isExtension = window.location.href.slice(0, 6) === 'vscode';
+export const isExtension = true;
 export const vscode = isExtension?(global as any).acquireVsCodeApi(): null;

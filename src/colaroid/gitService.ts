@@ -106,11 +106,10 @@ export class GitService {
 		}
 		return { hash, result };
 	};
-
+s
 	public revertGit = async (hash: string): Promise<any> => {
-		const revertResult = await this.git.reset(["--hard", hash]);
-		await sleep(1000);
-		return true;
+		await this.git.reset(["--hard", hash]);
+		return;
 	};
 
 	public generateDiff = async (

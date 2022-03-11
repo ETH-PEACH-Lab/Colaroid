@@ -5,11 +5,10 @@ import { selectContent } from './notebookSlice';
 import { Cell } from './Cell';
 import { Button, ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
 import { vscode } from '../../utils';
-import { isExtension } from '../../utils';
 import { Slide } from '../slide/Slide';
 export function Notebook() {
     const content = useAppSelector(selectContent);
-     const [notebookView, setNotebookView] = React.useState(0);
+    const [notebookView, setNotebookView] = React.useState(0);
     const exportNotebook = () => {
         const state = store.getState();
         vscode.postMessage({
@@ -18,15 +17,15 @@ export function Notebook() {
         });
     };
     return <div className="notebook-container">
-        {notebookView === 0?
-        <div>
-        {content.map((cell, index) => 
-        <Cell content={cell} index={index} key={index} mdOnly={cell.result.length===0}/>
-        )}
-        </div>
-        :
-        <Slide></Slide>    
-    }
+        {notebookView === 0 ?
+            <div>
+                {content.map((cell, index) =>
+                    <Cell content={cell} index={index} key={index} mdOnly={cell.result.length === 0} />
+                )}
+            </div>
+            :
+            <Slide></Slide>
+        }
 
     </div>;
 }

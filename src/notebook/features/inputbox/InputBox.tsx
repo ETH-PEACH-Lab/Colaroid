@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { isExtension, vscode } from '../../utils';
+import { vscode } from '../../utils';
 import { store } from '../../app/store';
 export function InputBox() {
     const [isHide, setHide] = React.useState(false);
@@ -39,11 +39,6 @@ export function InputBox() {
                 <button className="instruction-btn" id="snapshot-btn" onClick={createSnapshot}>
                     <i className="codicon codicon-pencil" style={{marginRight:'5px'}}></i>  Insert a Snapshot
                 </button>
-                {/* {isExtension &&
-                        <button className="instruction-btn" id="export-btn" onClick={exportNotebook}>
-                            <i className="codicon codicon-go-to-file" style={{marginRight: '5px'}}></i>  Export Notebook
-                        </button>
-                } */}
             </div>
             </div>
         }

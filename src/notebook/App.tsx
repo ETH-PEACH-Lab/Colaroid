@@ -43,10 +43,9 @@ export function App() {
                 .then(response => {
                     return response.json();
                 })
-                .then(jsondata =>
-                    {
-                        dispatch(initState(jsondata.notebook));
-                    }
+                .then(jsondata => {
+                    dispatch(initState(jsondata.notebook));
+                }
                 );
             const additional_style = document.createElement('style');
             additional_style.innerHTML = `
@@ -67,12 +66,14 @@ export function App() {
 
     return <div>
         {isExtension ?
-        <>
-        <InputBox />
-        <Instruction />
-        <Notebook />
-        </>:
-        <Notebook />
+            <>
+                <InputBox />
+                <Instruction />
+                <Notebook />
+            </> :
+            <>
+                <Notebook />
+            </>
         }
     </div>;
 }
