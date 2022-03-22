@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { CellData, deleteCell, moveCellDown, moveCellUp, selectContent, updateActiveEdit, selectActiveEdit } from "./notebookSlice";
+import { CellData, deleteCell, moveCellDown, moveCellUp, selectContent, updateActiveEdit, selectActiveEdit, selectViewOption } from "./notebookSlice";
 import { vscode } from '../../utils';
 
 interface CellToolbarProps {
@@ -11,6 +11,8 @@ interface CellToolbarProps {
 export function CellToolbar(props: CellToolbarProps) {
     const content = useAppSelector(selectContent);
     const activeEdit = useAppSelector(selectActiveEdit);
+    const viewOption = useAppSelector(selectViewOption);
+
     const [isEditing, setIsEditing] = React.useState(false);
     const [styleIcon, setStyleIcon] = React.useState('codicon-diff-added')
     const dispatch = useAppDispatch();
@@ -83,14 +85,15 @@ export function CellToolbar(props: CellToolbarProps) {
 
     return <div className="toolbar-container">
         <ul className='toolbar-wrapper' id={`toolbar-wrapper-${props.hash}`}>
-            {!props.mdOnly &&
-                <li className='wrapper-button' onClick={revertHandler}><i className="codicon codicon-sync"></i></li>
+            {(!props.mdOnly && viewOption === '1') &&
+                <li className='wrapper-button' onClick={revertHandler} title="Go to this version"><i className="codicon codicon-go-to-file"></i></li>
             }
             {/* <li className='wrapper-button' onClick={moveUpHandler} title="Move Up"><i className="codicon codicon-arrow-up"></i></li>
 
             <li className='wrapper-button' onClick={moveDownHandler} title="Move Down"><i className="codicon codicon-arrow-down" ></i></li> */}
-            <li className='wrapper-button' onClick={deleteHandler} title="Delete"><i className="codicon codicon-trash"></i></li>
-
+            {viewOption === '2' &&
+                <li className='wrapper-button' onClick={deleteHandler} title="Delete"><i className="codicon codicon-trash"></i></li>
+            }
         </ul>
     </div>;
 }

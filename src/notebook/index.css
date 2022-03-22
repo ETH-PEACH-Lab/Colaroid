@@ -197,7 +197,7 @@ header {
 	border-radius: 5px;
 }
 .wrapper-progress{
-	width: 100px;
+	width: 100%;
 	margin: auto;
 }
 .wrapper-button::before {
@@ -369,7 +369,7 @@ iframe {
 
 .notebook-container {
 	padding:20px;
-	padding-bottom:150px;
+	padding-bottom:50px;
 }
 
 .start-container {
@@ -424,4 +424,21 @@ iframe {
     align-items: center;
     justify-content: center;
 	border-radius: 5px;	
+}
+
+.experiment-container{
+	height: 80vh;
+}
+
+.experiment-container > iframe {
+	height:100%;
+}
+
+.view-btn {
+	font-size: 10px;
+}
+
+.condition-btn-container {
+	margin-top: 10px;
+	margin-bottom: 10px;
 }

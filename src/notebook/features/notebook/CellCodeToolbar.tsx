@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
-import { deleteCell, selectContent, updateActiveEdit, selectActiveEdit } from "./notebookSlice";
+import { deleteCell, selectContent, updateActiveEdit, selectActiveEdit, selectViewOption } from "./notebookSlice";
 import { vscode } from '../../utils';
 import { Dropdown } from 'react-bootstrap';
 
@@ -13,6 +13,7 @@ interface CellToolbarProps {
 export function CellCodeToolbar(props: CellToolbarProps) {
     const content = useAppSelector(selectContent);
     const activeEdit = useAppSelector(selectActiveEdit);
+    const viewOption = useAppSelector(selectViewOption);
     const [isEditing, setIsEditing] = React.useState(false);
     const dispatch = useAppDispatch();
 
@@ -48,7 +49,7 @@ export function CellCodeToolbar(props: CellToolbarProps) {
 
     return <div className="toolbar-container">
         <ul className='toolbar-wrapper' id={`toolbar-wrapper-${props.hash}`}>
-            {!props.mdOnly &&
+            {(!props.mdOnly && viewOption==='2') &&
                 <li className={activeEdit === findIndex() ? "wrapper-button is-edit" : "wrapper-button"} onClick={editHandler} title={activeEdit === findIndex() ? "Save Edits" : "Edit"}><i className={activeEdit === findIndex() ? "codicon codicon-save-as" : "codicon codicon-edit"}></i></li>
             }
             {!props.mdOnly &&

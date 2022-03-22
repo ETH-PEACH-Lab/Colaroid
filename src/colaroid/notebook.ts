@@ -4,6 +4,7 @@ import { GitService } from "./gitService";
 import {
 	getNonce,
 	getWebviewOptions,
+	readExperimentDoc,
 	readLocalDoc,
 	saveLocalDoc,
 	saveState,
@@ -22,6 +23,8 @@ export class ColaroidNotebookPanel {
 	private readonly path: string;
 	private gitService;
 	private content: any[] = [];
+	private experimentSetting: any;
+
 	private disposables: vscode.Disposable[] = [];
 
 	public static display(extensionUri: vscode.Uri, path: string) {
@@ -63,6 +66,10 @@ export class ColaroidNotebookPanel {
 			this.init();
 		});
 
+		readExperimentDoc(this.path).then((data) => {
+			this.experimentSetting = data;
+		});
+
 		// Listen for when the panel is disposed
 		// This happens when the user closes the panel
 		this.panel.onDidDispose(() => {
@@ -91,6 +98,7 @@ export class ColaroidNotebookPanel {
 			const content = { message, ...result, recording };
 			this.panel.webview.postMessage({ command: "append", content });
 		}
+		this.panel.webview.postMessage({command: "experiment setting", content: this.experimentSetting});
 	}
 
 	private async appendCell(data: any) {
