@@ -43,6 +43,7 @@ export function CellMDEditor(props: CellProps) {
                 command: "revise message",
                 id: props.content.hash
             });
+            keyPressed["Shift"] = false;
         }
     };
 
