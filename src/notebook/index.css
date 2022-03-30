@@ -345,6 +345,7 @@ iframe {
 
 .output-wrapper {
 	background: white;
+	height:500px;
 }
 
 .input-box-wrapper {
