@@ -3,12 +3,16 @@ import * as React from 'react';
 import { ProgressBar } from "react-bootstrap";
 import { isExtension, vscode } from "../../utils";
 import unique from 'unique-selector';
+import { useAppSelector } from "../../app/hooks";
+import { selectViewOption } from "../notebook/notebookSlice";
 
 
 export const HTMLOutputRender = (props: CellProps) => {
     const iframeWrapperRef = React.createRef<HTMLDivElement>();
     const recordRef = React.createRef<HTMLLIElement>();
     const playRef = React.createRef<HTMLLIElement>();
+    const viewOption = useAppSelector(selectViewOption);
+
 
     const item = props.content.result[0];
     const [iframeDocument, setIframeDocument] = React.useState(null);
@@ -136,7 +140,7 @@ export const HTMLOutputRender = (props: CellProps) => {
     const startRecord = () => {
         recording.startTime = Date.now();
         recording.events = [];
-        setRecording(recording)
+        setRecording(recording);
         handlers.map(x => listen(x.eventName, x.handler));
     };
     const stopRecord = () => {
@@ -193,9 +197,9 @@ export const HTMLOutputRender = (props: CellProps) => {
         if (isRecord) {
             stopRecord();
             // e.target.innerText = "Start Record";
-            playRef.current.classList.toggle('stop');
+            playRef.current?.classList.toggle('stop');
             recordRef.current.innerHTML = '<i class="codicon codicon-record"></i>';
-            recordRef.current.classList.toggle('active');
+            recordRef.current?.classList.toggle('active');
             vscode.postMessage({
                 content: JSON.stringify(recording),
                 command: "save recording",
@@ -204,9 +208,9 @@ export const HTMLOutputRender = (props: CellProps) => {
         }
         else {
             startRecord();
-            playRef.current.classList.toggle('stop');
+            playRef.current?.classList.toggle('stop');
             recordRef.current.innerHTML = '<i class="codicon codicon-stop-circle"></i>';
-            recordRef.current.classList.toggle('active');
+            recordRef.current?.classList.toggle('active');
         }
         isRecord = !isRecord;
     };
@@ -224,7 +228,7 @@ export const HTMLOutputRender = (props: CellProps) => {
             var clickEvent = document.createEvent("MouseEvents");
             clickEvent.initMouseEvent("click", true, true, window, 1, 0, 0, 0, 0,
                 false, false, false, false, 0, null);
-            if(target) target.dispatchEvent(clickEvent);
+            if (target) target.dispatchEvent(clickEvent);
         }
     };
     const flashClass = (el: HTMLElement, className) => {
@@ -249,9 +253,10 @@ export const HTMLOutputRender = (props: CellProps) => {
             <div className="toolbar-container">
                 <ul className='toolbar-wrapper'>
                     <li className='wrapper-button' onClick={reload} title="Refresh"><i className="codicon codicon-refresh"></i></li>
-                    {isExtension &&
+                    {(isExtension && viewOption === '2') &&
                         <li className='wrapper-button' onClick={handleRecord} ref={recordRef} title="Record"><i className="codicon codicon-record"></i></li>
                     }
+
                     <li className='wrapper-button' onClick={startPlay} ref={playRef} title="Play the Recording"><i className="codicon codicon-play"></i></li>
                     <li className='wrapper-progress' ><ProgressBar now={progress} /></li>
                 </ul>

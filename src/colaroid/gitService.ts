@@ -19,10 +19,10 @@ export class GitService {
 	private checkGitExist = async () => {
 		try {
 			const statusResult = await this.git.status();
-			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid");
+			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.experiment");
 		} catch (error) {
 			const initResult = await this.git.init();
-			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid");
+			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.experiment");
 		}
 	};
 

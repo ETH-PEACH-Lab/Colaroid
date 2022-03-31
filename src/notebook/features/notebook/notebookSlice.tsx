@@ -19,7 +19,13 @@ export const notebookSlice = createSlice({
     initialState: {
       value: 0,
       content: [],
-      activeEdit: -1
+      activeEdit: -1,
+      viewOption: '1',
+      experimentCondition: '1',
+      experimentSetting: {
+        video: '',
+        article: ''
+      }
     },
     reducers: {
       initState: (state, action) => {
@@ -68,11 +74,23 @@ export const notebookSlice = createSlice({
       incrementByAmount: (state, action) => {
         state.value += action.payload;
       },
+      updateViewOption: (state, action) => {
+        state.viewOption = action.payload;
+      },
+      updateExperimentCondition: (state, action) => {
+        state.experimentCondition = action.payload;
+      },
+      updateExperimentSetting: (state, action) => {
+        state.experimentSetting = action.payload;
+      }
     },
   });
   
   // Action creators are generated for each case reducer function
-  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState, cleanContent, updateActiveEdit } = notebookSlice.actions;
+  export const { increment, decrement, incrementByAmount, appendContent, deleteCell, changeMarkdown, moveCellDown, moveCellUp, initState, cleanContent, updateActiveEdit, updateViewOption, updateExperimentSetting, updateExperimentCondition } = notebookSlice.actions;
   export const selectContent = (state: RootState) => state.notebook.content;
   export const selectActiveEdit = (state: RootState) => state.notebook.activeEdit;
+  export const selectViewOption = (state: RootState) => state.notebook.viewOption;
+  export const selectExperimentSetting = (state: RootState) => state.notebook.experimentSetting;
+  export const selectExperimentCondition = (state: RootState) => state.notebook.experimentCondition;
   export default notebookSlice.reducer;

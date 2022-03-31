@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { InputBox } from './features/inputbox/InputBox';
 import { Instruction } from './features/instruction/Instruction';
 import { Notebook } from './features/notebook/Notebook';
-import { appendContent, initState, cleanContent } from './features/notebook/notebookSlice';
+import { appendContent, initState, cleanContent, updateExperimentSetting } from './features/notebook/notebookSlice';
 import { vscode, isExtension } from './utils';
 
 export function App() {
@@ -27,6 +27,10 @@ export function App() {
                     case "scroll":
                         let cellsModel = document.querySelectorAll('.cell-wrapper');
                         cellsModel[event.data.index].scrollIntoView();
+                        break;
+                    case "experiment setting":
+                        if(event.data.content !== [])
+                        dispatch(updateExperimentSetting(event.data.content));
                         break;
                     default:
                         break;
@@ -59,7 +63,7 @@ export function App() {
                 padding: 20px 100px;
             }
             `
-            document.head.appendChild(additional_style)
+            document.head.appendChild(additional_style);
         }
     }, []);
 
