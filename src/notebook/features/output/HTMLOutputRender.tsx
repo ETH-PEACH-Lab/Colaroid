@@ -39,7 +39,7 @@ export const HTMLOutputRender = (props: CellProps) => {
 
         // match the script name
         const jsRegex = /<script src=(.*\.js?).>\s*<\/script>/g;
-        const cssRegex = /<link rel=.stylesheet.* href=(.*\.css?).>/g;
+        const cssRegex = /<link rel=.stylesheet.* href=(.*\.css?).*>/g;
         const jsResults = [...mainHTMLDocument.matchAll(jsRegex)];
         jsResults.forEach(line => {
             const jsLine = line[0];
