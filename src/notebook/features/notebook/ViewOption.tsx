@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useAppDispatch } from '../../app/hooks';
 import { updateExperimentCondition, updateViewOption } from './notebookSlice';
 import { ButtonGroup, ToggleButton } from 'react-bootstrap';
+import { vscode } from '../../utils';
 
 export function ViewOption() {
     const [radioValue, setRadioValue] = React.useState('1');
@@ -13,9 +14,9 @@ export function ViewOption() {
     ];
 
     const conditionRadios = [
-        { name: 'Condition 1', value: '1' },
-        { name: 'Condition 2', value: '2' },
-        { name: 'Condition 3', value: '3' }
+        { name: 'Colaroid', value: '1' },
+        { name: 'Video', value: '2' },
+        { name: 'Article', value: '3' }
     ];
     const dispatch = useAppDispatch();
 
@@ -28,6 +29,18 @@ export function ViewOption() {
     const onConditionChange = (value: string) => {
         dispatch(updateExperimentCondition(value));
         setConditionValue(value);
+        if(value === '2') {
+            console.log('switch to video')
+            vscode.postMessage({
+                command: "switch video"
+            });
+        }
+        if(value === '3') {
+            console.log("switch to article")
+            vscode.postMessage({
+                command: "switch article"
+            });
+        }
     };
 
 

@@ -241,6 +241,13 @@ export class ColaroidNotebookPanel {
 				"The current step is displayed in the code editor."
 			);
 		}
+		if (message.command === "switch video") {
+			await vscode.commands.executeCommand("simpleBrowser.show", this.experimentSetting.video);
+		}
+		if (message.command === "switch article") {
+			await vscode.commands.executeCommand("simpleBrowser.show", this.experimentSetting.article);
+		}
+
 		if (message.command === "start editing") {
 			this.gitService.prepareEditing(message.id);
 			vscode.window.showInformationMessage(
