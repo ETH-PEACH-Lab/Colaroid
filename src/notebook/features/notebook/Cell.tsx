@@ -6,7 +6,6 @@ import { Output } from '../output/Output';
 import { isExtension } from '../../utils';
 import { useAppSelector } from '../../app/hooks';
 import { CellEditor } from './CellEditor';
-import { CellCodeToolbar } from './CellCodeToolbar';
 export interface CellProps {
     content: CellData,
     index: number,

@@ -22,11 +22,6 @@
 				"command": "colaroid.create",
 				"title": "Open Notebook",
 				"category": "Colaroid"
-			},
-			{
-				"command": "colaroid.timeline",
-				"title": "Timeline View",
-				"category": "Colaroid"
 			}
 		]
 	},
