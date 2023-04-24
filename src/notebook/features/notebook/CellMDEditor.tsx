@@ -32,7 +32,7 @@ export function CellMDEditor(props: CellProps) {
   };
 
   const switchMode = () => {
-    if (viewOption==='1') return;
+    if (viewOption === "1") return;
     if (isExtension) setMode(!mode);
   };
 
