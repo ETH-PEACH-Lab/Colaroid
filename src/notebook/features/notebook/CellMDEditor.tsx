@@ -93,7 +93,7 @@ export function CellMDEditor(props: CellProps) {
                 } as EditorConstructionOptions
               }
               value={markdownValue}
-              theme="vs-dark"
+              theme="vs-light"
               onChange={onChangeHandler}
               editorDidMount={editorDidMount}
             />

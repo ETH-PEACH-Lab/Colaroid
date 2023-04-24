@@ -1,5 +1,5 @@
-export const vscode = (global as any).acquireVsCodeApi();
-
+export const isExtension = window.location.href.slice(0, 6) === 'vscode';
+export const vscode = isExtension?(global as any).acquireVsCodeApi(): null;
 export const getLanguage = (format) =>{
     let language = '';
     switch (format) {

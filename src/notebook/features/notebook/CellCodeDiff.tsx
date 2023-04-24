@@ -162,7 +162,7 @@ export function CellCodeDiff(props: CellCodeDiffProps) {
                 <MonacoDiffEditor
                     language={props.language}
                     options={{ ...options, readOnly: true } as EditorConstructionOptions}
-                    theme="vs-dark"
+                    theme="vs-light"
                     original={props.original}
                     value={props.current}
                     editorDidMount={editorDidMount}

@@ -24,6 +24,7 @@ export function Notebook() {
         {notebookView === 0 ?
             <div>
                 <ViewOption></ViewOption>
+                <button onClick={exportNotebook}>Export</button>
                 {/* {experimentCondition === '1' && */}
                     <div>
                 {content.map((cell, index) =>
