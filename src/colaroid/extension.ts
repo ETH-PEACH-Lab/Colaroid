@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import { timeline } from "console";
 import * as vscode from "vscode";
+import { GitService } from "./gitService";
 import { ColaroidNotebookPanel } from "./notebook";
 import { ColaroidTimelinePanel } from "./timeline";
 
@@ -13,12 +14,15 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
+	let path = vscode.workspace.workspaceFolders[0].uri.path;
+
+	let gitService = new GitService(path);
+
 	let disposable = vscode.commands.registerCommand("colaroid.create", () => {
 		// The code you place here will be executed every time your command is executed
 
 		let message: string;
 		if (vscode.workspace.workspaceFolders !== undefined) {
-			let path = vscode.workspace.workspaceFolders[0].uri.path;
 			// let f = vscode.workspace.workspaceFolders[0].uri.fsPath ;
 
 			message = `YOUR-EXTENSION: folder: ${path}`;
@@ -31,6 +35,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 			vscode.window.showErrorMessage(message);
 		}
+	});
+
+	let reload = vscode.commands.registerCommand("colaroid.reload", () => {
+			gitService.pullLatest();
 	});
 
 	let timelineHandler = vscode.commands.registerCommand("colaroid.timeline", () => {
@@ -57,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	context.subscriptions.push(disposable, timelineHandler);
+	context.subscriptions.push(disposable, reload, timelineHandler);
 }
 
 // this method is called when your extension is deactivated

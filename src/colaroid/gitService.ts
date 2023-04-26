@@ -76,9 +76,9 @@ export class GitService {
 
 		// last rename branches
 		// TODO
-        await this.git.branch(["-D", "master"]);
+        await this.git.branch(["-D", "main"]);
         await this.git.branch(["-D", "change"]);
-        await this.git.checkout(["-b", "master"]);
+        await this.git.checkout(["-b", "main"]);
         await this.git.branch(["-D", "merge"]);
 
 		return hashList;
@@ -126,4 +126,9 @@ s
 		const checkoutResult = await this.git.checkout([hash, "."]);
 		return checkoutResult;
 	};
+
+	public pullLatest = async (): Promise<any> => {
+		const pullResult = await this.git.pull('origin', 'main');
+		return pullResult;
+	}
 }

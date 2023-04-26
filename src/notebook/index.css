@@ -70,6 +70,7 @@ h4 {
 
 .title-list-wrapper .selected {
   background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-editorWidget-background);
 }
 
 button,
@@ -337,7 +338,8 @@ iframe {
 }
 
 .edit-in-progress {
-  background-color: #222;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
   width: 100%;
   height: 100%;
   text-align: center;
@@ -415,7 +417,7 @@ iframe {
 }
 
 .dropdown-menu {
-  background-color: var(--vscode-activityBar-background);
+  background-color: var(--vscode-editorWidget-background);
   min-width: 0rem !important;
 }
 

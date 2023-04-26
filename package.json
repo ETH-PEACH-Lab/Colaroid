@@ -3,7 +3,8 @@
 	"displayName": "Colaroid",
 	"description": "Document code changes and create computational narratives",
 	"publisher": "LittleAprilFool",
-	"version": "0.2.0",
+	"icon": "images/colaroid-icon.png",
+	"version": "0.4.0",
 	"repository": "https://github.com/LittleAprilFool/Colaroid",
 	"engines": {
 		"vscode": "^1.54.0"
@@ -13,6 +14,7 @@
 	],
 	"activationEvents": [
 		"onCommand:colaroid.create",
+		"onCommand:colaroid.reload",
 		"onCommand:colaroid.timeline"
 	],
 	"main": "./dist/extension.js",
@@ -21,6 +23,11 @@
 			{
 				"command": "colaroid.create",
 				"title": "Open Notebook",
+				"category": "Colaroid"
+			},
+			{
+				"command": "colaroid.reload",
+				"title": "Reload Notebook",
 				"category": "Colaroid"
 			}
 		]
