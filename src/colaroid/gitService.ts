@@ -34,7 +34,6 @@ export class GitService {
 	public prepareEditing = async (hash: string): Promise<any> => {
 		await this.git.checkout(["-b", "change"]);
 		await this.git.reset(["--hard", hash]);
-		console.log("finish preparing edits");
 		return;
 	};
 	public rebaseChange = async (
@@ -44,7 +43,6 @@ export class GitService {
 		// first, commit the edits to the change branch;
 		await this.git.add(["--all"]);
 		await this.git.commit("Oops");
-
 
 		// next, checkout to the merge branch
 		await this.git.checkout(["-b", "merge"]);
@@ -74,7 +72,7 @@ export class GitService {
 			
 		}
 
-		// last rename branches
+		// last rename branchesm
 		// TODO
         await this.git.branch(["-D", "main"]);
         await this.git.branch(["-D", "change"]);
@@ -128,7 +126,7 @@ s
 	};
 
 	public pullLatest = async (): Promise<any> => {
-		const pullResult = await this.git.pull('origin', 'main');
+		const pullResult = await this.git.pull('origin', 'master');
 		return pullResult;
 	}
 }

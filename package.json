@@ -4,7 +4,7 @@
 	"description": "Document code changes and create computational narratives",
 	"publisher": "LittleAprilFool",
 	"icon": "images/colaroid-icon.png",
-	"version": "0.4.0",
+	"version": "0.6.0",
 	"repository": "https://github.com/LittleAprilFool/Colaroid",
 	"engines": {
 		"vscode": "^1.54.0"
