@@ -5,10 +5,12 @@ import * as vscode from "vscode";
 import { GitService } from "./gitService";
 import { ColaroidNotebookPanel } from "./notebook";
 import { ColaroidTimelinePanel } from "./timeline";
+import { TimelinePanel } from "./timelinePanel";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 
 	// The command has been defined in the package.json file
@@ -18,17 +20,36 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let gitService = new GitService(path);
 
+	//----------added-------------
+
+	var curTimelinePanel = null;
+	var curNotebook = null;
+
 	let disposable = vscode.commands.registerCommand("colaroid.create", () => {
 		// The code you place here will be executed every time your command is executed
 
+		if(!curTimelinePanel) {
+		curTimelinePanel = new TimelinePanel(context.extensionUri, path);
+
+		curTimelinePanel.gitService = gitService;
+
+		context.subscriptions.push(
+	  		vscode.window.registerWebviewViewProvider(TimelinePanel.viewType, curTimelinePanel));
+		}
+
+		
+
 		let message: string;
-		if (vscode.workspace.workspaceFolders !== undefined) {
+		if (vscode.workspace.workspaceFolders !== undefined || !curNotebook) {
 			// let f = vscode.workspace.workspaceFolders[0].uri.fsPath ;
 
 			message = `YOUR-EXTENSION: folder: ${path}`;
 
 			vscode.window.showInformationMessage(message);
-			ColaroidNotebookPanel.display(context.extensionUri, path);
+			curNotebook = new ColaroidNotebookPanel(undefined,context.extensionUri, path, curTimelinePanel);
+			//curNotebook = ColaroidNotebookPanel.display(context.extensionUri, path, curTimelinePanel);
+			curTimelinePanel.colaroidNotebookPanel = curNotebook;
+			//curNotebook.timelinePanel = curTimelinePanel;
 		} else {
 			message =
 				"YOUR-EXTENSION: Working folder not found, open a folder an try again";
@@ -64,8 +85,39 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showErrorMessage(message);
 		}
 	});
+	//---added
+	const updatePanel = vscode.commands.registerCommand("colaroid.updateTimelinePanel", (data, branch) => {
+        curTimelinePanel.updateTimeline(data, branch);
+    });
 
-	context.subscriptions.push(disposable, reload, timelineHandler);
+	const removePanelButton = vscode.commands.registerCommand("colaroid.removePanelButton", (data) => {
+        curTimelinePanel.removeButton(data);
+    });
+
+	const updateNotebook = vscode.commands.registerCommand("colaroid.revertSnapshot", (data) => {
+		curNotebook.handleMessage(data);
+	});
+
+	const removeStudentButton = vscode.commands.registerCommand("colaroid.removeStudentButton", (data) => {
+		curNotebook.handleMessage(data);
+	});
+
+	const addStudentButton = vscode.commands.registerCommand("colaroid.addStudentButton", (data) => {
+		curNotebook.handleMessage(data);
+	});
+
+	const prevStep = vscode.commands.registerCommand("colaroid.prevStep", (data) => {
+		curNotebook.handleMessage(data);
+	});
+
+	const nextStep = vscode.commands.registerCommand("colaroid.nextStep", (data) => {
+		curNotebook.handleMessage(data);
+	});
+
+	//---
+	context.subscriptions.push(disposable, reload, timelineHandler, updatePanel, updateNotebook,
+		removePanelButton, removeStudentButton, addStudentButton, prevStep, nextStep
+	);
 }
 
 // this method is called when your extension is deactivated

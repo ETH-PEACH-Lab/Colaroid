@@ -34,7 +34,7 @@ export function App() {
             cellsModel[event.data.index].scrollIntoView();
             break;
           case "experiment setting":
-            if (event.data.content !== [])
+            if (true) //event.data.content !== [])
               dispatch(updateExperimentSetting(event.data.content));
             break;
           default:

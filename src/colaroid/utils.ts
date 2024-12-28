@@ -36,10 +36,12 @@ export const readLocalDoc = async (dir: string): Promise<any> => {
 		// check if .colaroid exists
 		fs.readFile(`${dir}/.colaroid`, "utf8", (err, data) => {
 			if (err) {
+				vscode.window.showInformationMessage("no .colaroid file")
 				resolve([]);
 			} else {
 				// parse JSON string to JSON object
 				const doc = JSON.parse(data);
+				vscode.window.showInformationMessage(data)
 				resolve(doc);
 			}
 		});
@@ -61,9 +63,30 @@ export const readExperimentDoc = async (dir: string): Promise<any> => {
 	});
 };
 
+export const readLocalDocStudent = async (dir: string): Promise<any> => {
+	return new Promise((resolve, reject) => {
+		// check if .colaroid exists
+		fs.readFile(`${dir}/.student`, "utf8", (err, data) => {
+			if (err) {
+				resolve([]);
+			} else {
+				// parse JSON string to JSON object
+				const doc = JSON.parse(data);
+				resolve(doc);
+			}
+		});
+	});
+};
+
 export const saveLocalDoc = async (dir: string, data: any): Promise<any> => {
 	fs.writeFileSync(`${dir}/.colaroid`, JSON.stringify(data));
 };
+
+export const saveLocalDocStudent = async (dir: string, data: any): Promise<any> => {
+	fs.writeFileSync(`${dir}/.student`, JSON.stringify(data));
+};
+
+
 
 export const saveState = async (dir: string, data: any): Promise<any> => {
 	fs.writeFileSync(dir, JSON.stringify(data));

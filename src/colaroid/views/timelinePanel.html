@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="${styleUri}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js" nonce="${nonce}"></script>
+</head>
+
+<body>
+    <div id="CHOOSE">
+        <button class="step-btn" id="prev-btn">
+            <i class="codicon codicon-pencil" style="margin-right: 5px"></i> < 
+        </button>
+        <div id="timeline-container">
+            <div id="timeline">
+            </div>
+        </div>
+        <button class="step-btn" id="next-btn">
+            <i class="codicon codicon-pencil" style="margin-right: 5px"></i> >
+        </button>
+        <!-- <div id="timeline-buttons">
+            <button class="step-btn" id="prev-btn">
+                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> < 
+            </button>
+            <button class="step-btn" id="next-btn">
+                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> >
+            </button>
+        </div> -->
+    </div>
+    <div id="content-container">
+        <div id="step-description">
+            <div id="step-text">
+            </div>
+            <button id="load-button">
+                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> Load
+            </button>
+        </div>
+        <div id="button-container">
+            <button class="save-btn" id="save-btn">
+                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> Save your Step
+            </button>
+            <button class="btn" id="change-mode">
+                <i class="codicon codicon-pencil" style="margin-right: 5px"></i>Explorer mode
+            </button>
+        </div>
+    </div>
+    
+    <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
+</body>
+
+</html>

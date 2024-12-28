@@ -31,7 +31,7 @@ export function CellCodeDiff(props: CellCodeDiffProps) {
   const editorDidMount = (editor) => {
     editor.onDidUpdateDiff(() => {
       const changes = editor.getLineChanges();
-      if (changes.length > 0) {
+      if (changes && changes.length > 0) {
         const startNumber = changes[0].originalStartLineNumber;
         editor.revealLineNearTop(startNumber);
       }

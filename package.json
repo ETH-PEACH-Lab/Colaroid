@@ -17,8 +17,26 @@
 		"onCommand:colaroid.reload",
 		"onCommand:colaroid.timeline"
 	],
-	"main": "./dist/extension.js",
+	"main": "./out/colaroid/extension.js", 
 	"contributes": {
+		"viewsContainers": {
+            "panel": [
+                {
+                    "id": "myPanel",
+                    "title": "Timeline Panel",
+                    "icon": "$(device-camera)"
+                }
+            ]
+        }, 
+		"views": {
+			"myPanel": [
+                {
+                    "type": "webview",
+                    "id": "colaroid.timelinePanel",
+                    "name": "Timeline Panel"
+                }
+            ]
+		},
 		"commands": [
 			{
 				"command": "colaroid.create",
@@ -29,6 +47,39 @@
 				"command": "colaroid.reload",
 				"title": "Reload Notebook",
 				"category": "Colaroid"
+			},
+			{
+				"command": "colaroid.timeline",
+				"title": "Timeline Notebook",
+				"category": "Colaroid"
+			},
+			{
+				"command": "colaroid.updateTimelinePanel",
+				"title": "Update Timeline Panel"
+			},
+			{	
+				"command": "colaroid.revertSnapshot",
+				"title": "revert Snapshot"
+			},
+			{	
+				"command": "colaroid.removePanelButton",
+				"title": "remove Button"
+			},
+			{
+				"command": "colaroid.removeStudentButton",
+				"title": "remove student button"
+			},
+			{
+				"command": "colaroid.addStudentButton",
+				"title": "add student button"
+			},
+			{
+				"command": "colaroid.nextStep",
+				"title": "go to next Step"
+			},
+			{
+				"command": "colaroid.prevStep",
+				"title": "go to previous Step"
 			}
 		]
 	},

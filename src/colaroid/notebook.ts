@@ -6,9 +6,13 @@ import {
   getWebviewOptions,
   readExperimentDoc,
   readLocalDoc,
+  readLocalDocStudent,
   saveLocalDoc,
+  saveLocalDocStudent,
   saveState,
 } from "./utils";
+import { assert } from "console";
+import { TimelinePanel } from "./timelinePanel";
 
 export class ColaroidNotebookPanel {
   /**
@@ -18,16 +22,22 @@ export class ColaroidNotebookPanel {
   public static currentPanel: ColaroidNotebookPanel | undefined;
   public static readonly viewType = "colaroid";
 
-  private readonly panel: vscode.WebviewPanel;
+  private /*readonly*/ panel: vscode.WebviewPanel;
   private readonly extensionUri: vscode.Uri;
   private readonly path: string;
   private gitService;
   private content: any[] = [];
+  private studentHashes: any[] = [];
   private experimentSetting: any;
+
+  public timelinePanel: TimelinePanel | undefined;
+
+  private contentActive: number = 0;
+  private alreadyInit = false;
 
   private disposables: vscode.Disposable[] = [];
 
-  public static display(extensionUri: vscode.Uri, path: string) {
+  public async /*static */ display(extensionUri: vscode.Uri/*, path: string, timelinePanel: TimelinePanel*/)/*: ColaroidNotebookPanel | null*/ {
     // If we already have a panel, show it
     if (ColaroidNotebookPanel.currentPanel) {
       ColaroidNotebookPanel.currentPanel.panel.reveal(vscode.ViewColumn.Two);
@@ -35,6 +45,7 @@ export class ColaroidNotebookPanel {
     }
 
     //Otherwise, create a new panel.
+    
     const panel = vscode.window.createWebviewPanel(
       ColaroidNotebookPanel.viewType,
       "Colaroid",
@@ -42,25 +53,52 @@ export class ColaroidNotebookPanel {
       getWebviewOptions(extensionUri)
     );
 
+    this.panel = panel;
+
+    this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
+
+    this.panel.onDidDispose(() => {
+      this.disposables;
+      ColaroidNotebookPanel.currentPanel = undefined;
+    });
+
+    this.panel.webview.onDidReceiveMessage(
+      this.handleMessage.bind(this),
+      null,
+      this.disposables
+    );
+
+    this.handleMessage({command: "new active content"});
+
+    /*
     ColaroidNotebookPanel.currentPanel = new ColaroidNotebookPanel(
       panel,
       extensionUri,
-      path
-    );
+      path,
+      timelinePanel
+    );*/
+
+    //return ColaroidNotebookPanel.currentPanel;
   }
 
-  private constructor(
+  public constructor(
     panel: vscode.WebviewPanel,
     extensionUri: vscode.Uri,
-    path: string
+    path: string,
+    timelinePanel: TimelinePanel
   ) {
     this.panel = panel;
     this.extensionUri = extensionUri;
     this.path = path;
-	this.gitService = new GitService(path);
+	  this.gitService = new GitService(path);
+    this.timelinePanel = timelinePanel;
 
     readLocalDoc(this.path).then((data) => {
       this.content = data;
+    });
+
+    readLocalDocStudent(this.path).then((data) => {
+      this.studentHashes = data;
       this.init();
     });
 
@@ -70,36 +108,52 @@ export class ColaroidNotebookPanel {
 
     // Listen for when the panel is disposed
     // This happens when the user closes the panel
-    this.panel.onDidDispose(() => {
+    /*this.panel.onDidDispose(() => {
       this.disposables;
       ColaroidNotebookPanel.currentPanel = undefined;
-    });
+    });*/
 
     // Handle messages from the webview
+    /*
     this.panel.webview.onDidReceiveMessage(
       this.handleMessage.bind(this),
       null,
       this.disposables
-    );
+    );*/
   }
 
   private async init() {
     // init the notebook
+    if(!this.panel) return;
     this.panel.title = "Colaroid Notebook";
     this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
   }
 
   private async initMessage() {
+    if(!this.alreadyInit) {
+    await this.timelinePanel.clearView();
+    }
     for (const data of this.content) {
-      const { hash, message, recording } = data;
+      const { hash, message, recording} = data;
       const result = await this.gitService.retrieveGitCommit(hash);
       const content = { message, ...result, recording };
-      this.panel.webview.postMessage({ command: "append", content });
+      if(this.panel) this.panel.webview.postMessage({ command: "append", content });
+
+      if(!this.alreadyInit) {
+        vscode.commands.executeCommand("colaroid.updateTimelinePanel", data, "master");
+      }
     }
-    this.panel.webview.postMessage({
+    
+    if(!this.alreadyInit) {
+    for (const data of this.studentHashes) {
+        vscode.commands.executeCommand("colaroid.updateTimelinePanel", data, "student");
+      }
+    }
+    this.alreadyInit = true;
+    /*this.panel.webview.postMessage({
       command: "experiment setting",
       content: this.experimentSetting,
-    });
+    });*/
   }
 
   private async appendCell(data: any) {
@@ -107,21 +161,26 @@ export class ColaroidNotebookPanel {
     const { hash, message, recording } = data;
     const result = await this.gitService.retrieveGitCommit(hash);
     const content = { message, ...result, recording };
+    if(!this.panel) return;
     this.panel.webview.postMessage({ command: "append", content });
+    vscode.commands.executeCommand("colaroid.updateTimelinePanel", data, "master");
   }
   // this sends command to the frontend to clean the current rendering and update the views
   private async refresh() {
+    if(!this.panel) return;
     this.panel.webview.postMessage({ command: "clean", content: {} });
     for (const data of this.content) {
       const { hash, message } = data;
       const result = await this.gitService.retrieveGitCommit(hash);
       const content = { message, ...result };
+      if(!this.panel) return;
       this.panel.webview.postMessage({ command: "append", content });
     }
   }
 
   private async scrollToStep(index: number) {
     setTimeout(() => {
+      if(!this.panel) return;
       this.panel.webview.postMessage({ command: "scroll", index });
     }, 1000);
   }
@@ -172,12 +231,37 @@ export class ColaroidNotebookPanel {
 					}
 				</script>
 				<script type="text/javascript" nonce="${nonce}" src="${scriptUri}"></script>
+        <script>
+                          function renderSpecificElement(id) {
+                            const wrappers = document.getElementsByClassName("cell-wrapper");
+
+                            Array.from(wrappers).forEach(wrapper => {
+                                if (wrapper.id === "cell-wrapper-" + id) {
+                                    wrapper.style.display = "block";
+                                  } else {
+                                    wrapper.style.display = "none";
+                                  }
+                            });
+                            
+                            }
+
+          window.addEventListener('message', (event) => {
+                                const message = event.data;
+                                if(message.command === "new active content")
+                                    renderSpecificElement(message.hash)
+                              });
+        </script>
 			</body>
 		</html>
         `;
   }
 
-  private async handleMessage(message) {
+
+
+
+
+  public async handleMessage(message) {
+    console.log("Message: " + message.command)
     if (message.command === "ready") {
       this.initMessage();
     }
@@ -195,6 +279,37 @@ export class ColaroidNotebookPanel {
         vscode.window.showInformationMessage("New cell is added.");
       });
     }
+
+    if(message.command === "nextStep") {
+      if(this.content.length-1 > this.contentActive) {
+        this.contentActive++;
+        this.handleMessage({command: "new active content"})
+      }
+    }
+
+    if(message.command === "prevStep") {
+      if(this.contentActive > 0) {
+        this.contentActive--;
+        this.handleMessage({command: "new active content"})
+      }
+    }
+
+    if(message.command === "new active content") {
+      const {hash} = this.content[this.contentActive];
+      if(!this.panel) return;
+      this.panel.webview.postMessage({
+        command: "new active content",
+        hash: hash
+    });
+    }
+
+    if (message.command === "save") {
+      console.log("save received");
+      const data = {hash:message.hash, step: this.contentActive};
+      this.studentHashes.push(data);
+      saveLocalDocStudent(this.path, this.studentHashes);
+    }
+
     if (message.command === "revise message") {
       console.log("revise message received");
       const index = this.content.findIndex((item, idx) => {
@@ -209,7 +324,16 @@ export class ColaroidNotebookPanel {
       });
       this.content.splice(index, 1);
       saveLocalDoc(this.path, this.content);
+      vscode.commands.executeCommand("colaroid.removePanelButton", message);
       vscode.window.showInformationMessage("The cell is removed.");
+    }
+
+    if (message.command === "remove student button") {
+      const index = this.studentHashes.findIndex((item, idx) => {
+        return item.hash === message.id;
+      });
+      this.studentHashes.splice(index, 1);
+      saveLocalDocStudent(this.path, this.studentHashes);
     }
 
     if (message.command === "move up cell") {
@@ -237,7 +361,14 @@ export class ColaroidNotebookPanel {
       saveLocalDoc(this.path, this.content);
     }
     if (message.command === "revert snapshot") {
+      console.log("Revert snapshot received with ID: ", message.id);
+      await this.saveFiles();
       this.gitService.revertGit(message.id);
+      const index = this.content.findIndex(data => data.hash === message.id);
+      if(index > -1) {
+         this.contentActive = index;
+         this.handleMessage({command: "new active content"})
+      }
       vscode.window.showInformationMessage(
         "The current step is displayed in the code editor."
       );
@@ -297,4 +428,18 @@ export class ColaroidNotebookPanel {
     await vscode.commands.executeCommand("workbench.action.files.saveAll");
     return;
   };
+
+  public getIndex() {
+    return this.contentActive;
+  }
+
+  public getContent(step: number) {
+    assert(step >= 0)
+    assert(step < this.content.length)
+    return this.content[step];
+  }
+
+  public getPath() {
+    return this.path;
+  }
 }

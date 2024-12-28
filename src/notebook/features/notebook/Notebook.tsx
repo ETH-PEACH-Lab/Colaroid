@@ -31,14 +31,14 @@ export function Notebook() {
           <ViewOption></ViewOption>
           {/* <button onClick={exportNotebook}>Export</button> */}
           {/* {experimentCondition === '1' && */}
-          <div>
+          <div> 
             {content.map((cell, index) => (
-              <Cell
+              <Cell 
                 content={cell}
                 index={index}
                 key={index}
                 mdOnly={cell.result.length === 0}
-              />
+              /> 
             ))}
           </div>
           {/* // }

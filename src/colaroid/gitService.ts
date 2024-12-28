@@ -9,7 +9,7 @@ export class GitService {
 		const options: Partial<SimpleGitOptions> = {
 			baseDir: dir,
 			binary: "git",
-			maxConcurrentProcesses: 6,
+			maxConcurrentProcesses: 6, 
 		};
 		this.dir = dir;
 		this.git = simpleGit(options);
@@ -19,10 +19,17 @@ export class GitService {
 	private checkGitExist = async () => {
 		try {
 			const statusResult = await this.git.status();
-			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.experiment");
+			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.student\n.experiment");
+			
 		} catch (error) {
 			const initResult = await this.git.init();
-			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.experiment");
+			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.student\n.experiment");
+
+			///--- create the student branch and empty main branch where the solution will be ---
+			await this.git.commit("new Notebook", ["--allow-empty"]);
+			await this.git.branch(["--no-track", "student"]); 
+
+			
 		}
 	};
 
@@ -104,7 +111,7 @@ export class GitService {
 		}
 		return { hash, result };
 	};
-s
+
 	public revertGit = async (hash: string): Promise<any> => {
 		await this.git.reset(["--hard", hash]);
 		return;
@@ -129,4 +136,47 @@ s
 		const pullResult = await this.git.pull('origin', 'master');
 		return pullResult;
 	}
+
+	//---added
+	public getCommitHistory = async (): Promise<any[]> => {
+		const log = await this.git.log({ '--pretty': '%H %P %s' });
+		const commits = log.all.map((entry) => {
+			const parts = entry.message.split(' ');
+			const hash = parts[0];
+			const parents = parts.slice(1, -1);
+			const message = parts[parts.length - 1];
+			return { hash, parents, message };
+		});
+		return commits;
+	};
+
+	//---added
+	public buildCommitTree = async (): Promise<any> => {
+		const commits = await this.getCommitHistory();
+		const commitMap = new Map<string, any>();
+	
+		commits.forEach((commit) => {
+			commitMap.set(commit.hash, { ...commit, children: [] });
+		});
+	
+		commits.forEach((commit) => {
+			commit.parents.forEach((parentHash) => {
+				if (commitMap.has(parentHash)) {
+					commitMap.get(parentHash).children.push(commit.hash);
+				}
+			});
+		});
+	
+		return Array.from(commitMap.values());
+	};
+
+	public createGitCommitStudent = async (): Promise<any> => {
+		await this.git.stash();
+		await this.git.checkout(["student"]);
+		await this.git.stash(["pop"])
+		const addResult = await this.git.add(["--all"]);
+		const commitResult = await this.git.commit("void");
+		return commitResult;
+	};
+	
 }
