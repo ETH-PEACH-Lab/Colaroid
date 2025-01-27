@@ -1,50 +1,115 @@
+<!-- 
+ 
+- choose load-button codicon style
+
+-->
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <link href="${styleUri}" rel="stylesheet">
+    <link href="https://microsoft.github.io/vscode-codicons/dist/codicon.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js" nonce="${nonce}"></script>
 </head>
 
 <body>
     <div id="CHOOSE">
         <button class="step-btn" id="prev-btn">
-            <i class="codicon codicon-pencil" style="margin-right: 5px"></i> < 
+            <i class="codicon codicon-chevron-left"></i>
         </button>
         <div id="timeline-container">
             <div id="timeline">
             </div>
         </div>
         <button class="step-btn" id="next-btn">
-            <i class="codicon codicon-pencil" style="margin-right: 5px"></i> >
+            <i class="codicon codicon-chevron-right"></i>
         </button>
-        <!-- <div id="timeline-buttons">
-            <button class="step-btn" id="prev-btn">
-                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> < 
-            </button>
-            <button class="step-btn" id="next-btn">
-                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> >
-            </button>
-        </div> -->
+        <div id="commit-container">
+            <div id="commit-student">
+                <div class="name-container">
+                    <label for="name"></label>
+                    <input type="text" id="student-name-input" name="name" maxlength="10"><br><br>
+                    <button id="student-change-name-btn" class="change-name-btn">
+                        <i class=" codicon codicon-pencil" style="padding-right: 5px;"></i>
+                    </button>
+                </div>
+                <button class="btn" id="compare-btn">Compare
+                </button>
+                <button class="btn" id="render-student-btn">Render
+                </button>
+                <button class="btn" id="delete-btn">Delete Save
+                </button>
+            </div>
+            <div id="commit-master">
+                <div class="name-container">
+                    <label for="name"></label>
+                    <input type="text" id="master-name-input" name="name" maxlength="10"><br><br>
+                    <button id="master-change-name-btn" class="change-name-btn">
+                        <i class=" codicon codicon-pencil" style="padding-right: 5px;"></i>
+                    </button>
+                </div>
+                <button class="btn" id="show-solution">Show Solution
+                </button>
+                <button class="btn" id="render-master-btn">Render
+                </button>
+                <button class="btn" id="verify-btn">Verify
+                </button>
+            </div>
+            <div id="commit-empty">
+            </div>
+        </div>
     </div>
     <div id="content-container">
         <div id="step-description">
             <div id="step-text">
             </div>
-            <button id="load-button">
-                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> Load
-            </button>
-        </div>
-        <div id="button-container">
-            <button class="save-btn" id="save-btn">
-                <i class="codicon codicon-pencil" style="margin-right: 5px"></i> Save your Step
-            </button>
-            <button class="btn" id="change-mode">
-                <i class="codicon codicon-pencil" style="margin-right: 5px"></i>Explorer mode
+            <button id="load-button" title="load step into editor">
+                <i class="codicon codicon-go-to-file" style="margin-left: -3px;"></i>
             </button>
         </div>
     </div>
-    
+    <div id="sidepanel-container">
+        <div id="btn-container">
+            <button class="btn" id="save-btn">
+                <i class="codicon codicon-save"></i>
+                <div class="tooltip">Create save point in your timeline</div>
+            </button>
+            <button class="btn" id="author-btn">
+                <i class="codicon codicon-pencil"></i>
+            </button>
+            <button class="btn" id="copilot-btn">
+                <i class="codicon codicon-copilot"></i>
+            </button>
+            <button class="btn" id="settings-btn">
+                <i class="codicon codicon-settings-gear"></i>
+            </button>
+        </div>
+        <div id="sidepanel" style="width: 0px;">
+            <div id="settings">
+                <button class="btn" id="reset-solve-btn">
+                    <i class="codicon codicon-debug-restart"></i>Reset Solved
+                </button>
+                <button class="btn" id="reset-student-btn">
+                    <i class="codicon codicon-debug-restart"></i>Reset Student
+                </button>
+            </div>
+            <div id="llm-assistance">
+                <div id="llm-btn-container">
+                    <button class="btn" id="llm-test-btn">
+                        <i class="codicon codicon-beaker"></i>
+                        <div class="tooltip">Tests your active save against the master solution from the same step</div>
+                    </button>
+                    <button class="btn" id="llm-hint-btn">
+                        <i class="codicon codicon-question"></i>
+                        <div class="tooltip">Gives you a hint for your active save</div>
+                    </button>
+                </div>
+                <div id="llm-response-text">
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 

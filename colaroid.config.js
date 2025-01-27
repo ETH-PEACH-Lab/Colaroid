@@ -8,8 +8,9 @@ module.exports = {
         filename: 'extension.js',
         libraryTarget: 'commonjs2',
         devtoolModuleFilenameTemplate: '../[resource-path]',
+        chunkFilename: '[name].bundle.js'
     },
-    mode: 'development',
+    mode: 'development',    
     devtool: 'source-map',
     ignoreWarnings: [{ module: /ws\/lib/}],
     externals: {

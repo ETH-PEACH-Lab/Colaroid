@@ -6,6 +6,7 @@ import { GitService } from "./gitService";
 import { ColaroidNotebookPanel } from "./notebook";
 import { ColaroidTimelinePanel } from "./timeline";
 import { TimelinePanel } from "./timelinePanel";
+import { exec } from "child_process";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -29,18 +30,17 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 
 		if(!curTimelinePanel) {
-		curTimelinePanel = new TimelinePanel(context.extensionUri, path);
+		curTimelinePanel = new TimelinePanel(context, path);
 
 		curTimelinePanel.gitService = gitService;
 
 		context.subscriptions.push(
-	  		vscode.window.registerWebviewViewProvider(TimelinePanel.viewType, curTimelinePanel));
+	  		vscode.window.registerWebviewViewProvider(TimelinePanel.viewType, curTimelinePanel,
+			{webviewOptions: {retainContextWhenHidden: true}}));
 		}
 
-		
-
 		let message: string;
-		if (vscode.workspace.workspaceFolders !== undefined || !curNotebook) {
+		if (vscode.workspace.workspaceFolders !== undefined && !curNotebook) {
 			// let f = vscode.workspace.workspaceFolders[0].uri.fsPath ;
 
 			message = `YOUR-EXTENSION: folder: ${path}`;
@@ -48,9 +48,11 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showInformationMessage(message);
 			curNotebook = new ColaroidNotebookPanel(undefined,context.extensionUri, path, curTimelinePanel);
 			//curNotebook = ColaroidNotebookPanel.display(context.extensionUri, path, curTimelinePanel);
-			curTimelinePanel.colaroidNotebookPanel = curNotebook;
+			//curTimelinePanel.setNotebook(curNotebook);
 			//curNotebook.timelinePanel = curTimelinePanel;
 		} else {
+
+			//TODO: adjust message to also consider case !curNotbook
 			message =
 				"YOUR-EXTENSION: Working folder not found, open a folder an try again";
 
@@ -59,7 +61,9 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	let reload = vscode.commands.registerCommand("colaroid.reload", () => {
-			gitService.pullLatest();
+			//gitService.pullLatest();
+			curTimelinePanel.clearView();
+			curTimelinePanel.setNotebook(curNotebook);
 	});
 
 	let timelineHandler = vscode.commands.registerCommand("colaroid.timeline", () => {

@@ -1,3 +1,10 @@
+/*
+
+- set foreground color for all button elements (can be done by setting color attribute -> load-button)
+- set root var for button size, container height etc.
+
+*/
+
 body {
     background: var(--vscode-panel-background);
     color: var(--vscode-panel-foreground);
@@ -13,9 +20,10 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 50%;
-    margin-top: 20px;
-    max-height: 200px;
+    margin-top: 15px;
+    height: 200px;
+    justify-content: flex-end;
+    overflow-x: hidden;
 }
 
 #step-description {
@@ -26,14 +34,18 @@ body {
     border: 2px solid var(--vscode-focusBorder);
     margin-left: 20px;
     margin-right: 20px;
-    flex: 1;
-    flex-direction: row;
+    display: flex;
+    flex-direction: row-reverse;
     justify-content: space-between;
     overflow-y: scroll;
+    direction: rtl;
+    resize: horizontal;
+    width: 500px;
 }
 
 #step-text {
-    padding: 10px;
+    padding: 13px;
+    direction: ltr;
 }
 
 #step-text :first-child {
@@ -41,28 +53,101 @@ body {
 }
 
 #load-button {
-    background: gray;
-    border: 2px solid var(--vscode-focusBorder);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    width: 24px;
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 0;
+    border-left: 2px solid var(--vscode-focusBorder);
+    cursor: pointer;
 }
 
-#button-container {
+#load-button:hover {
+    background: var(--vscode-button-secondaryHoverBackground);
+}
+
+#btn-container {
     display: flex;
     flex-direction: column;
 }
 
 #CHOOSE {
-    width: 50%;
-    display: flex;
-    flex-direction: row;
-    margin-top: 20px;
+    display: grid;
+    grid-template-rows: max-content auto;
+    grid-template-columns: 16px auto 16px;
+    flex: 1 1;
+    margin-top: 15px;
     margin-left: 20px;
+    height: 200px;
+}
+
+#commit-container {
+    grid-row: 2;
+    grid-column: 1 / span 3;
+    align-self: stretch;
+    display: flex;
+    align-items: flex-start;
+}
+
+#commit-empty {
+    display: flex;
+    height: 40px;
+    border-radius: 0 0 10px 10px;
+    background: var(--vscode-button-background);
+    border: 1px solid var(--vscode-button-separator);
+    width: 100%;
+}
+
+#commit-master,
+#commit-student {
+    display: none;
+    flex-grow: 1;
+}
+
+#commit-master>*,
+#commit-student>* {
+    flex-grow: 1;
+    width: 100%;   
+}
+
+#commit-container .btn {
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--vscode-button-separator);
+}
+
+#commit-container .btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#commit-master > :first-child,
+#commit-student > :first-child{
+    border-radius: 0 0 0 10px;
+}
+
+#commit-master > :last-child,
+#commit-student > :last-child {
+    border-radius: 0 0 10px 0;
 }
 
 #timeline-container {
+    box-sizing: border-box;
+    grid-row: 1;
+    grid-column: 2;
     background: var(--vscode-editor-background);
     overflow: auto;
     width: 100%;
     height: 100%;
+    min-height: 120px;
+    justify-self: stretch;
     position: relative;
 }
 
@@ -104,9 +189,13 @@ body {
     height: 20px;
     border-radius: 50%;
     background-color: transparent;
-    border: 4px solid #4caf50;
+    border: 4px solid grey;
     cursor: pointer;
     position: relative;
+}
+
+.solved .commit-button {
+    border-color: #4caf50;
 }
 
 .step-container {
@@ -116,8 +205,12 @@ body {
     border-top: 3px solid grey;
 }
 
-.step-container.active { 
-    border-top: 5px solid green;
+.step-container.active {
+    border-top: 5px solid #CC5500 !important;
+}
+
+.step-container.solved {
+    border-color: green;
 }
 
 
@@ -126,8 +219,13 @@ body {
     height: 25px;
 }
 
-.commit-button.active {
+.step-container.solved .commit-button.active {
     background-color: #4caf50;
+    border: none;
+}
+
+.commit-button.active {
+    background-color: grey;
     border: none;
 }
 
@@ -140,9 +238,30 @@ body {
     cursor: pointer;
 }
 
+.save-button.fromStudent,
+.save-button.endpoint {
+    border-color: #007ea8; 
+    
+}
+
+.save-button.fromMaster {
+    border-color: #4caf50; 
+}
+
+.save-button.fromStudent.active,
+.save-button.endpoint.active {
+    background-color: #007ea8; 
+    border: none;
+}
+
+.save-button.fromMaster.active {
+    background-color: #4caf50; 
+    border: none;
+}
+
 .step-container.active .save-button {
-   width: 25px;
-   height: 25px;
+    width: 25px;
+    height: 25px;
 }
 
 .save-button.active {
@@ -162,6 +281,7 @@ body {
     height: 100%;
     background-color: #4caf50;
     transition: width 2s ease-in-out;
+    z-index: 9000;
 }
 
 .button-container {
@@ -169,54 +289,377 @@ body {
     justify-content: flex-end;
 }
 
-.save-btn {
-    background: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    margin-top: 4px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4px;
-    width: 150px;
-    margin-right: 30px;
-    border: 0;
-}
-
 .step-btn {
-    background: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 15px;
-    align-self: stretch;
-    border: 0;
-}
-
-.btn {
-    background: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    margin-top: 4px;
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    padding: 4px;
-    width: 150px;
-    margin-right: 30px;
-    border: 0;
-}
-
-.focus-button {
-    width: 40px;
-    height: 40px;
-    position: relative;
-    top: 50%;
-    border: none;
-    border-radius: 50%;
-    background-color: #f0f0f0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    font-size: 24px;
-    color: #333;
     cursor: pointer;
-    transition: background-color 0.2s, box-shadow 0.2s;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 16px;
+    align-self: stretch;
+    border: 1px solid var(--vscode-button-separator);
+    border-bottom: none;
+    box-sizing: border-box;
+}
+
+.step-btn:hover {
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#prev-btn {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+#next-btn {
+    grid-row: 1;
+    grid-column: 3;
+}
+
+#btn-container>.btn {
+    position: relative;
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border: 1px solid var(--vscode-button-separator);
+    border-right: 0px;
+    cursor: pointer;
+}
+
+#btn-container>.btn:hover{
+    background-color: var(--vscode-button-hoverBackground);
+}
+
+#btn-container>.btn:first-child {
+    border-radius: 10px 0 0 0;
+}
+
+#btn-container>.btn:last-child {
+    border-radius: 0 0 0 10px;
+}
+
+#save-btn:disabled {
+    cursor: not-allowed;;
+}
+
+.button-popup {
+    display: none;
+    position: relative;
+    top: 20px;
+    left: 0px;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    z-index: 9999;
+    /* high value to put it in to foreground, 
+                      prone to failure if other elements have an unexpectedly higher value */
+}
+
+#sidepanel-container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: row;
+}
+
+#sidepanel {
+    width: 0px;
+    height: 200px;
+    background-color: var(--vscode-editor-background);
+    color: var(--vscode-button-foreground);
+    box-sizing: border-box;
+    border: 2px solid var(--vscode-focusBorder);
+    border-right: 0px;
+    border-left: 0px;
+    transition: width 0.5s ease;
+}
+
+#settings {
+    display: none;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.verify-popup {
+    height: 145px;
+    width: 210px;
+    position: absolute;
+    top: 20px;
+    left: 35%;
+    background: var(--vscode-notifications-background);
+    border: 1px solid var(--vscode-notifications-border);
+    ;
+    padding: 10px;
+    z-index: 9999;
+    cursor: grab;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: auto auto;
+    border-radius: 10px 10px 10px 10px;
+}
+
+.close-btn {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: red;
+    border: 0px;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    cursor: pointer;
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: flex-end;
+}
+
+.close-btn .codicon {
+    transform: scale(0.8);
+}
+
+#verify-button-popup {
+    background-color: grey;
+    border: 2px solid dimgray;
+    border-radius: 7px;
+    color: #F8F9F9;
+    font-family: monospace;
+    width: 80px;
+    height: 60px;
+    cursor: pointer;
+    grid-row: 3;
+    grid-column: 2;
+    justify-content: center;
+    justify-self: center;
+    align-self: flex-end;
+}
+
+#verify-button-popup:hover {
+    background-color: dimgray;
+}
+
+#verify-button-popup.verified {
+    border-color: #2ada18;
+    background-color: #3a9f3a;
+}
+
+#verify-button-popup.verified:hover {
+    background-color: #2ada18;
+}
+
+#verify-icon {
+    grid-row: 2;
+    grid-column: 1 / span 2;
+    justify-self: center;
+    color: Grey;
+}
+
+#verify-icon .codicon {
+    transform: scale(4);
+}
+
+#radio-select-container {
+    grid-row: 3;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    gap: 7px;
+    align-self: flex-end;
+}
+
+#radio-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.label-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.label-container .radio-box {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    width: 30px;
+    background-color: var(--vscode-radio-inactiveBackground);
+    border: 2px solid var(--vscode-radio-inactiveBorder);
+    color: var(--vscode-radio-inactiveForeground);
+    border-radius: 25%;
+    cursor: pointer;
+}
+
+.label-container .radio-box:hover {
+    background-color: var(--vscode-radio-inactiveHoverBackground);
+}
+
+.label-container input:checked~.radio-box {
+    background-color: var(--vscode-radio-activeBackground);
+    border: 2px solid var(--vscode-radio-activeBorder);
+    color: var(--vscode-radio-activeForeground);
+}
+
+.label-container input:disabled~.radio-box {
+    cursor: not-allowed;
+}
+
+.label-container input:disabled {
+    cursor: not-allowed;
+}
+
+#select-save {
+    width: 15ch;
+    height:max-content;
+}
+
+.name-container {
+    background-color: var(--vscode-button-background);
+    border: 1px solid var(--vscode-button-separator);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 16px;
+}
+
+.name-container * {
+    color: var(--vscode-button-foreground);
+}
+
+.change-name-btn {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    padding-left: 2px;
+    cursor: pointer;
+}
+
+#master-name-input,
+#student-name-input {
+    background-color: transparent;
+    border: none;
+    width: 15ch;
+    height: max-content;
+}
+
+#llm-assistance {
+    display: none;
+    height: 100%;
+}
+
+#llm-btn-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#llm-btn-container>.btn{
+    position: relative;
+    background-color: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border-color: var(--vscode-focusBorder);
+    border-left: none;
+    width: 30px;
+    height: 50%;
+    cursor: pointer;
+}
+
+#llm-btn-container>.btn:hover{
+    background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+#llm-response-text {
+    padding: 10px;
+    overflow-y: scroll;
+}
+
+#select-save {
+    background-color: var(--vscode-dropdown-background);
+    color: var(--vscode-dropdown-foreground);
+}
+
+.tooltip {
+    position: absolute;
+    top: 50%; 
+    right: 135%;
+    transform: translateY(-50%);
+    background-color: var(--vscode-editorHoverWidget-background);
+    border: 2px solid var(--vscode-editorHoverWidget-border);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: monospace;
+    opacity: 0;
+    min-width: 150px;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 10000;
+}
+
+.radio-box .tooltip{
+    bottom: 135%; 
+    left: 50%;
+    top: auto;
+    right: auto;
+    transform: translateX(-50%);
+}
+
+.tooltip::before {
+    content: '';
+    position: absolute;
+    top: 50%; 
+    left: calc(100% + 2px);
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid; 
+    border-color: transparent transparent transparent var(--vscode-editorHoverWidget-background);
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%; 
+    left: calc(100% + 2px);
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid; 
+    border-color: transparent transparent transparent var(--vscode-editorHoverWidget-border);
+}
+
+.radio-box .tooltip::before {
+    top: calc(100% + 2px); 
+    left: 50%;
+    transform: translateX(-50%);
+    border-color: var(--vscode-editorHoverWidget-background) transparent transparent transparent;
+}
+
+.radio-box .tooltip::after {
+    top: calc(100% + 2px); 
+    left: 50%;
+    transform: translateX(-50%);
+    border-color: var(--vscode-editorHoverWidget-border) transparent transparent transparent;
+}
+
+.radio-box:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+#save-btn:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
+#llm-btn-container .btn:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
 }

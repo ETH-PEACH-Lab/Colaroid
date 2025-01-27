@@ -27,17 +27,24 @@ export class ColaroidNotebookPanel {
   private readonly path: string;
   private gitService;
   private content: any[] = [];
-  private studentHashes: any[] = [];
+  private studentHashes: {
+    hash: string,
+    step: number,
+    from: string,
+    name: string
+  }[] = [];
   private experimentSetting: any;
 
   public timelinePanel: TimelinePanel | undefined;
 
   private contentActive: number = 0;
-  private alreadyInit = false;
+  private authorMode: Boolean = false;
+
 
   private disposables: vscode.Disposable[] = [];
 
-  public async /*static */ display(extensionUri: vscode.Uri/*, path: string, timelinePanel: TimelinePanel*/)/*: ColaroidNotebookPanel | null*/ {
+  public async /*static */ display(extensionUri: vscode.Uri, authorMode: Boolean = false/*, path: string, timelinePanel: TimelinePanel*/)/*: ColaroidNotebookPanel | null*/ {
+    this.authorMode = authorMode;
     // If we already have a panel, show it
     if (ColaroidNotebookPanel.currentPanel) {
       ColaroidNotebookPanel.currentPanel.panel.reveal(vscode.ViewColumn.Two);
@@ -45,7 +52,7 @@ export class ColaroidNotebookPanel {
     }
 
     //Otherwise, create a new panel.
-    
+
     const panel = vscode.window.createWebviewPanel(
       ColaroidNotebookPanel.viewType,
       "Colaroid",
@@ -55,7 +62,7 @@ export class ColaroidNotebookPanel {
 
     this.panel = panel;
 
-    this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
+    this.panel.webview.html = this.getHTMLForDoc(this.panel.webview, authorMode);
 
     this.panel.onDidDispose(() => {
       this.disposables;
@@ -67,8 +74,6 @@ export class ColaroidNotebookPanel {
       null,
       this.disposables
     );
-
-    this.handleMessage({command: "new active content"});
 
     /*
     ColaroidNotebookPanel.currentPanel = new ColaroidNotebookPanel(
@@ -90,21 +95,26 @@ export class ColaroidNotebookPanel {
     this.panel = panel;
     this.extensionUri = extensionUri;
     this.path = path;
-	  this.gitService = new GitService(path);
+    this.gitService = new GitService(path);
     this.timelinePanel = timelinePanel;
 
+    this.getData();
+
+    /*
     readLocalDoc(this.path).then((data) => {
       this.content = data;
     });
 
     readLocalDocStudent(this.path).then((data) => {
       this.studentHashes = data;
-      this.init();
+      //this.init();
     });
 
     readExperimentDoc(this.path).then((data) => {
       this.experimentSetting = data;
     });
+
+    this.timelinePanel.setNotebook(this);
 
     // Listen for when the panel is disposed
     // This happens when the user closes the panel
@@ -122,34 +132,51 @@ export class ColaroidNotebookPanel {
     );*/
   }
 
-  private async init() {
-    // init the notebook
-    if(!this.panel) return;
-    this.panel.title = "Colaroid Notebook";
-    this.panel.webview.html = this.getHTMLForDoc(this.panel.webview);
+  private async getData() {
+    await readLocalDoc(this.path).then((data) => {
+      this.content = data;
+    });
+
+    await readLocalDocStudent(this.path).then((data) => {
+      this.studentHashes = data;
+    });
+
+    await readExperimentDoc(this.path).then((data) => {
+      this.experimentSetting = data;
+    });
+
+    this.timelinePanel.setNotebook(this);
   }
 
+  private async init() {
+    // init the notebook
+    if (!this.panel) return;
+    this.panel.title = "Colaroid Notebook";
+    this.panel.webview.html = this.getHTMLForDoc(this.panel.webview, this.authorMode);
+  }
+
+  //Try to append only activeStep as timeline creates notebook only when loading step(Reading mode)
   private async initMessage() {
-    if(!this.alreadyInit) {
-    await this.timelinePanel.clearView();
-    }
+    /*if(!this.alreadyInit) {
+     await this.timelinePanel.clearView();
+     }*/
     for (const data of this.content) {
-      const { hash, message, recording} = data;
+      const { hash, message, recording } = data;
       const result = await this.gitService.retrieveGitCommit(hash);
       const content = { message, ...result, recording };
-      if(this.panel) this.panel.webview.postMessage({ command: "append", content });
+      if (this.panel) this.panel.webview.postMessage({ command: "append", content });
 
-      if(!this.alreadyInit) {
+      /*if(!this.alreadyInit) {
         vscode.commands.executeCommand("colaroid.updateTimelinePanel", data, "master");
-      }
+      }*/
     }
-    
-    if(!this.alreadyInit) {
+
+    /*if(!this.alreadyInit) {
     for (const data of this.studentHashes) {
         vscode.commands.executeCommand("colaroid.updateTimelinePanel", data, "student");
       }
     }
-    this.alreadyInit = true;
+    this.alreadyInit = true;*/
     /*this.panel.webview.postMessage({
       command: "experiment setting",
       content: this.experimentSetting,
@@ -161,31 +188,31 @@ export class ColaroidNotebookPanel {
     const { hash, message, recording } = data;
     const result = await this.gitService.retrieveGitCommit(hash);
     const content = { message, ...result, recording };
-    if(!this.panel) return;
+    if (!this.panel) return;
     this.panel.webview.postMessage({ command: "append", content });
     vscode.commands.executeCommand("colaroid.updateTimelinePanel", data, "master");
   }
   // this sends command to the frontend to clean the current rendering and update the views
   private async refresh() {
-    if(!this.panel) return;
+    if (!this.panel) return;
     this.panel.webview.postMessage({ command: "clean", content: {} });
     for (const data of this.content) {
       const { hash, message } = data;
       const result = await this.gitService.retrieveGitCommit(hash);
       const content = { message, ...result };
-      if(!this.panel) return;
+      if (!this.panel) return;
       this.panel.webview.postMessage({ command: "append", content });
     }
   }
 
   private async scrollToStep(index: number) {
     setTimeout(() => {
-      if(!this.panel) return;
+      if (!this.panel) return;
       this.panel.webview.postMessage({ command: "scroll", index });
     }, 1000);
   }
 
-  private getHTMLForDoc(webview: vscode.Webview) {
+  private getHTMLForDoc(webview: vscode.Webview, authorMode: Boolean) {
     const scriptPathOnDisk = vscode.Uri.file(
       path.join(this.extensionUri.path, "dist", "notebook.js")
     );
@@ -210,6 +237,21 @@ export class ColaroidNotebookPanel {
     // Use a nonce to only allow specific scripts to be run
     const nonce = getNonce();
 
+    var hideCells = "";
+    if(!authorMode) {
+      hideCells = `<style> 
+         .viewoption-container {
+            display: none;
+         }
+         .cell-wrapper {
+            display: none;
+         }
+         .start-container {
+            display: none;
+         }
+      </style>`
+    }
+
     return `<!DOCTYPE html>
 		<html lang="en">
 			<head>
@@ -219,6 +261,7 @@ export class ColaroidNotebookPanel {
 				<base href="${uriBase}">
 				<link href="${codiconsUri}" rel="stylesheet" />
 				<link href="https://use.fontawesome.com/releases/v5.15.2/css/all.css" rel="stylesheet">
+        `+hideCells+`
 			</head>
 			<body>
 				<div id="root"></div>
@@ -227,16 +270,19 @@ export class ColaroidNotebookPanel {
 						if (relativePath && relativePath[0] == '.' && relativePath[1]!== '.') {
 							return "${uriBase}" + relativePath.substring(1);
 						}
-						 rerturn "${uriBase}" + relativePath;
+						 return "${uriBase}" + relativePath;
 					}
 				</script>
 				<script type="text/javascript" nonce="${nonce}" src="${scriptUri}"></script>
         <script>
-                          function renderSpecificElement(id) {
+                          function renderSpecificCell(hash) {
                             const wrappers = document.getElementsByClassName("cell-wrapper");
-
+                            const codeWrapper = document.getElementById("code-cell-wrapper-"+hash)
+                            const entireCodeWrapper = codeWrapper.parentElement.parentElement;
+                            entireCodeWrapper.style.display = "none";
+                           
                             Array.from(wrappers).forEach(wrapper => {
-                                if (wrapper.id === "cell-wrapper-" + id) {
+                                if (wrapper.id === "cell-wrapper-" + hash) {
                                     wrapper.style.display = "block";
                                   } else {
                                     wrapper.style.display = "none";
@@ -247,8 +293,9 @@ export class ColaroidNotebookPanel {
 
           window.addEventListener('message', (event) => {
                                 const message = event.data;
-                                if(message.command === "new active content")
-                                    renderSpecificElement(message.hash)
+                                if(message.command === "new active content") {
+                                    renderSpecificCell(message.hash);
+                                  }
                               });
         </script>
 			</body>
@@ -257,13 +304,11 @@ export class ColaroidNotebookPanel {
   }
 
 
-
-
-
   public async handleMessage(message) {
     console.log("Message: " + message.command)
     if (message.command === "ready") {
-      this.initMessage();
+      await this.initMessage();
+      this.handleMessage({ command: "new active content" });
     }
     if (message.command === "add") {
       await this.saveFiles();
@@ -271,6 +316,8 @@ export class ColaroidNotebookPanel {
         const data = {
           message: message.content,
           hash: result.commit,
+          solved: false,
+          name: "Step " + (this.content.length + 1)
         };
         this.content.push(data);
         saveLocalDoc(this.path, this.content);
@@ -280,32 +327,33 @@ export class ColaroidNotebookPanel {
       });
     }
 
-    if(message.command === "nextStep") {
-      if(this.content.length-1 > this.contentActive) {
+    if (message.command === "nextStep") {
+      if (this.content.length - 1 > this.contentActive) {
         this.contentActive++;
-        this.handleMessage({command: "new active content"})
+        this.handleMessage({ command: "new active content" })
       }
     }
 
-    if(message.command === "prevStep") {
-      if(this.contentActive > 0) {
+    if (message.command === "prevStep") {
+      if (this.contentActive > 0) {
         this.contentActive--;
-        this.handleMessage({command: "new active content"})
+        this.handleMessage({ command: "new active content" })
       }
     }
 
-    if(message.command === "new active content") {
-      const {hash} = this.content[this.contentActive];
-      if(!this.panel) return;
+    if (message.command === "new active content") {
+      const { hash } = this.content[this.contentActive];
+      if (!this.panel || this.authorMode) return;
       this.panel.webview.postMessage({
         command: "new active content",
         hash: hash
-    });
+      });
     }
 
     if (message.command === "save") {
       console.log("save received");
-      const data = {hash:message.hash, step: this.contentActive};
+      const step = message.step;
+      const data = { hash: message.hash, step: step, from: message.from, name: message.name };
       this.studentHashes.push(data);
       saveLocalDocStudent(this.path, this.studentHashes);
     }
@@ -324,7 +372,14 @@ export class ColaroidNotebookPanel {
       });
       this.content.splice(index, 1);
       saveLocalDoc(this.path, this.content);
-      vscode.commands.executeCommand("colaroid.removePanelButton", message);
+      const step = this.timelinePanel.getStepfromHash(message.id, "master");
+      for (let i = 0; i < this.studentHashes.length; i++) {
+        if (this.studentHashes[i].step === step) {
+          this.studentHashes.splice(i, 1);
+        }
+      }
+      saveLocalDocStudent(this.path, this.studentHashes);
+      this.timelinePanel.removeButton(message);
       vscode.window.showInformationMessage("The cell is removed.");
     }
 
@@ -365,9 +420,9 @@ export class ColaroidNotebookPanel {
       await this.saveFiles();
       this.gitService.revertGit(message.id);
       const index = this.content.findIndex(data => data.hash === message.id);
-      if(index > -1) {
-         this.contentActive = index;
-         this.handleMessage({command: "new active content"})
+      if (index > -1) {
+        this.contentActive = index;
+        this.handleMessage({ command: "new active content" })
       }
       vscode.window.showInformationMessage(
         "The current step is displayed in the code editor."
@@ -433,13 +488,67 @@ export class ColaroidNotebookPanel {
     return this.contentActive;
   }
 
-  public getContent(step: number) {
+  /**
+  * returns the content of the Notebook.
+  * @param {number} step -  can be undefined or integer 0 <= step <= # of total steps
+  * @returns {any} if step undefined whole content array will be returned, else just the step given as an argument
+  */
+  public getContent(step?: number): any[] | any {
+    if (step === undefined) {
+      return this.content;
+    }
     assert(step >= 0)
     assert(step < this.content.length)
     return this.content[step];
   }
 
+  public getStudentHashes(): any[] {
+    return this.studentHashes;
+  }
+
   public getPath() {
     return this.path;
   }
+
+  public stepSolved(step: number) {
+    this.content[step].solved = true;
+    saveLocalDoc(this.path, this.content);
+  }
+
+  public resetSolved(step?: number) {
+    if (step === undefined) {
+      for (let i = 0; i < this.content.length; i++) {
+        this.content[i].solved = false;
+      }
+    } else {
+      this.content[step].solved = false;
+    }
+    saveLocalDoc(this.path, this.content);
+  }
+
+  public resetFrom(hash: string) {
+    const index = this.studentHashes.findIndex(data => {
+      return data.hash === hash;
+    })
+    this.studentHashes[index].from = undefined;
+    saveLocalDocStudent(this.path, this.studentHashes);
+  }
+
+  public changeName(name: string, hash: string, branch: string) {
+    if (branch === "student") {
+      const index = this.studentHashes.findIndex(data => {
+        return data.hash === hash;
+      })
+      this.studentHashes[index].name = name;
+      saveLocalDocStudent(this.path, this.studentHashes);
+    } else if (branch === "master") {
+      const index = this.content.findIndex(data => {
+        return data.hash === hash;
+      })
+      this.content[index].name = name;
+      saveLocalDoc(this.path, this.content);
+    }
+  }
+
+
 }

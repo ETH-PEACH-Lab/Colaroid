@@ -9,7 +9,7 @@ export class GitService {
 		const options: Partial<SimpleGitOptions> = {
 			baseDir: dir,
 			binary: "git",
-			maxConcurrentProcesses: 6, 
+			maxConcurrentProcesses: 6,
 		};
 		this.dir = dir;
 		this.git = simpleGit(options);
@@ -20,25 +20,42 @@ export class GitService {
 		try {
 			const statusResult = await this.git.status();
 			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.student\n.experiment");
-			
+
 		} catch (error) {
 			const initResult = await this.git.init();
 			await fs.writeFileSync(`${this.dir}/.gitignore`, ".colaroid\n.student\n.experiment");
+			await fs.writeFileSync(`${this.dir}/.colaroid`, "");
+			await fs.writeFileSync(`${this.dir}/.student`, "");
 
 			///--- create the student branch and empty main branch where the solution will be ---
 			await this.git.commit("new Notebook", ["--allow-empty"]);
-			await this.git.branch(["--no-track", "student"]); 
-
-			
+			await this.git.branch(["--no-track", "student"]);
 		}
 	};
 
+	//for mainbranch
 	public createGitCommit = async (message: string): Promise<any> => {
-		const addResult = await this.git.add(["--all"]);
-		const commitResult = await this.git.commit(message);
-		return commitResult;
+		try {
+		await this.git.stash(["push", "-a"])
+		await this.git.branch(["tmp"]);
+		await this.git.checkout(["-f", "tmp"]);
+		await this.git.stash(["pop"])
+		await this.git.add(["--all"])
+		await this.git.commit("main",["--allow-empty"]);
+		await this.git.checkout(["main"]);
+		await this.git.raw(["merge", "-s", "recursive", "-X", "theirs", "tmp"]);
+		const commitResult = await this.git.revparse(["HEAD"]);
+		await this.git.deleteLocalBranch("tmp");
+		return { commit: commitResult };
+		} catch(error) {
+			await this.git.checkout(["main"]);
+			await this.git.deleteLocalBranch("tmp");
+			throw new Error(error);
+		}
+		
 	};
 	public prepareEditing = async (hash: string): Promise<any> => {
+		//maybe checkout main first
 		await this.git.checkout(["-b", "change"]);
 		await this.git.reset(["--hard", hash]);
 		return;
@@ -47,6 +64,7 @@ export class GitService {
 		hashList: string[],
 		hash: string
 	): Promise<any> => {
+		//checkout main first?
 		// first, commit the edits to the change branch;
 		await this.git.add(["--all"]);
 		await this.git.commit("Oops");
@@ -64,27 +82,27 @@ export class GitService {
 
 		// cherry pick future commits
 		for (let i = hashIndex + 1; i < hashList.length; i++) {
-            try {
-                // ours - keep the original edits
-                const pick = await this.git.raw(["cherry-pick", "--strategy-option=ours", hashList[i]]);
+			try {
+				// ours - keep the original edits
+				const pick = await this.git.raw(["cherry-pick", "--strategy-option=ours", hashList[i]]);
 				console.log(pick);
-			    const result = [...pick.matchAll(/\[merge (.*)\]/g)];
-			    if (result.length > 0) {
-                hashList[i] = result[0][1];
-            }
-            } catch (e) {
-                console.log('Error occurred', e);
-				await this.git.raw(["commit", "--allow-empty", "-m", "keep original"]); 
-            }
-			
+				const result = [...pick.matchAll(/\[merge (.*)\]/g)];
+				if (result.length > 0) {
+					hashList[i] = result[0][1];
+				}
+			} catch (e) {
+				console.log('Error occurred', e);
+				await this.git.raw(["commit", "--allow-empty", "-m", "keep original"]);
+			}
+
 		}
 
 		// last rename branchesm
 		// TODO
-        await this.git.branch(["-D", "main"]);
-        await this.git.branch(["-D", "change"]);
-        await this.git.checkout(["-b", "main"]);
-        await this.git.branch(["-D", "merge"]);
+		await this.git.branch(["-D", "main"]);
+		await this.git.branch(["-D", "change"]);
+		await this.git.checkout(["-b", "main"]);
+		await this.git.branch(["-D", "merge"]);
 
 		return hashList;
 	};
@@ -133,50 +151,41 @@ export class GitService {
 	};
 
 	public pullLatest = async (): Promise<any> => {
-		const pullResult = await this.git.pull('origin', 'master');
+		const pullResult = await this.git.pull('origin', 'main');
 		return pullResult;
 	}
 
-	//---added
-	public getCommitHistory = async (): Promise<any[]> => {
-		const log = await this.git.log({ '--pretty': '%H %P %s' });
-		const commits = log.all.map((entry) => {
-			const parts = entry.message.split(' ');
-			const hash = parts[0];
-			const parents = parts.slice(1, -1);
-			const message = parts[parts.length - 1];
-			return { hash, parents, message };
-		});
-		return commits;
-	};
-
-	//---added
-	public buildCommitTree = async (): Promise<any> => {
-		const commits = await this.getCommitHistory();
-		const commitMap = new Map<string, any>();
-	
-		commits.forEach((commit) => {
-			commitMap.set(commit.hash, { ...commit, children: [] });
-		});
-	
-		commits.forEach((commit) => {
-			commit.parents.forEach((parentHash) => {
-				if (commitMap.has(parentHash)) {
-					commitMap.get(parentHash).children.push(commit.hash);
-				}
-			});
-		});
-	
-		return Array.from(commitMap.values());
-	};
-
 	public createGitCommitStudent = async (): Promise<any> => {
-		await this.git.stash();
-		await this.git.checkout(["student"]);
+		try {
+		await this.git.stash(["push", "-a"])
+		await this.git.branch(["tmp"]);
+		await this.git.checkout(["-f", "tmp"]);
 		await this.git.stash(["pop"])
-		const addResult = await this.git.add(["--all"]);
-		const commitResult = await this.git.commit("void");
-		return commitResult;
+		await this.git.add(["--all"])
+		await this.git.commit("student",["--allow-empty"]);
+		await this.git.checkout(["student"]);
+		await this.git.raw(["merge", "-s", "recursive", "-X", "theirs", "tmp"]);
+		const commitResult = await this.git.revparse(["HEAD"]);
+		await this.git.deleteLocalBranch("tmp");
+		return { commit: commitResult };
+		} catch(error) {
+			await this.git.checkout(["student"]);
+			await this.git.deleteLocalBranch("tmp");
+			throw new Error(error);
+		}
 	};
-	
+
+		public takeOldCommit = async (hash: string): Promise<any> => {
+			await this.git.checkout(["student"]);
+			await this.git.checkout([hash, "--", "."]);
+			await this.git.add(["--all"]);
+			const commitResult = await this.git.commit("student", { "--allow-empty": null });
+			return commitResult;
+		}
+
+		public getFirstCommit = async(): Promise<any> => {
+			const firstCommitHash = (await this.git.raw(['rev-list', '--max-parents=0', "main"])).trim();
+    		return firstCommitHash;
+		}
+
 }

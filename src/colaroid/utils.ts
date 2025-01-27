@@ -86,8 +86,6 @@ export const saveLocalDocStudent = async (dir: string, data: any): Promise<any> 
 	fs.writeFileSync(`${dir}/.student`, JSON.stringify(data));
 };
 
-
-
 export const saveState = async (dir: string, data: any): Promise<any> => {
 	fs.writeFileSync(dir, JSON.stringify(data));
 };
