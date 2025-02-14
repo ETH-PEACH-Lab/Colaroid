@@ -348,7 +348,7 @@ export class TimelinePanel implements vscode.WebviewViewProvider {
                     }
 
                     this.hideDecoration = vscode.window.createTextEditorDecorationType({
-                        opacity: "0.5",
+                        opacity: "0",
                     });
 
                     const entireRange = new vscode.Range(

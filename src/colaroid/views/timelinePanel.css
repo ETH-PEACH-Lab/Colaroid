@@ -579,6 +579,7 @@ body {
 #llm-response-text {
     padding: 10px;
     overflow-y: scroll;
+    color: var(--vscode-editor-foreground)
 }
 
 #select-save {
@@ -593,7 +594,7 @@ body {
     transform: translateY(-50%);
     background-color: var(--vscode-editorHoverWidget-background);
     border: 2px solid var(--vscode-editorHoverWidget-border);
-    color: white;
+    color: var(--vscode-editorHoverWidget-foreground);
     padding: 8px 12px;
     border-radius: 5px;
     font-size: 14px;

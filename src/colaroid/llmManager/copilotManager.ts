@@ -1,23 +1,47 @@
 import * as vscode from "vscode";
 
-const ANNOTATION_PROMPT_TEST = `You are assisting a student working through a multi-step tutorial on web programming (HTML, CSS, and JavaScript/Typescript).
-You will receive two files as strings: one is the student's solution, and the other is the master solution. 
-Compare the two and determine if the student's solution achieves the same outcome as the master solution. 
-If you believe they are equivalent in functionality, respond with exactly: "Your Solution should be correct." 
-If they differ, provide a brief hint to guide the student towards improvement, without revealing any content from the master solution.
-Important Notes: 
-- Do not suggest running the code in a browser.
-- Do not use phrases like "It should match the master solution" if some part is wrong, as the student does not know the master solution. Focus instead on describing specific areas in the student's code that need improvement or adjustment.
-- The student is not in direct communication with you. Write your hint as if it will be shared with them through an intermediary or another interface.`;
+const ANNOTATION_PROMPT_TEST = `You are assisting a student working through a structured tutorial on web programming (HTML, CSS, and JavaScript/TypeScript). 
 
-const ANNOTATION_PROMPT_HINT = `You are assisting a student working through a multi-step tutorial on web programming (HTML, CSS, and JavaScript/Typescript).
-You will receive two files as strings: one is the student's solution, and the other is the master solution. 
-The student is stuck and needs a helpful hint to proceed. Provide a concise hint based on the differences you observe between the two files. 
-Ensure the hint is actionable and educational, but do not reveal or describe any content from the master solution.
-Important Notes: 
-- Do not suggest running the code in a browser.
-- Do not use phrases like "It should match the master solution" if some part is wrong, as the student does not know the master solution. Focus instead on describing specific areas in the student's code that need improvement or adjustment.
-- The student is not in direct communication with you. Write your hint as if it will be shared with them through an intermediary or another interface.`;
+### Task ###
+Compare the student's solution with the master solution. Determine whether the student's solution achieves the same functionality as the master solution.
+
+### Response Guidelines ###
+- If the solutions are functionally equivalent, respond with exactly: "Your solution should be correct."
+- If there are differences, provide a brief, actionable hint to guide the student toward improvement.
+- Instead of revealing or describing content from the master solution, focus on explaining the specific concepts or structures the student should review.
+- Rather than instructing the student to run the code in a browser, suggest reviewing specific parts of their code logic to identify potential errors.
+- Frame your response constructively by highlighting areas for improvement and guiding the student toward an effective revision.
+- The student is not in direct communication with you. Write your hint as if it will be shared with them through an intermediary or another interface.
+
+### Provided Files Format ###
+The student and master solutions are structured as complete HTML documents, with CSS and JavaScript included as inline styles and scripts. The files are processed as follows:
+- **Master Solution:** A fully integrated HTML document.
+- **Student Solution:** A corresponding attempt, structured in the same way.
+- External CSS and JavaScript files referenced in <link> and <script> tags have been inlined into the document.
+
+Below are the provided files:
+`;
+
+const ANNOTATION_PROMPT_HINT = `You are assisting a student in a step-by-step tutorial on web programming (HTML, CSS, and JavaScript/TypeScript). The student is stuck and needs guidance.
+
+### Task ###
+Analyze the differences between the student's solution and the master solution. Provide a useful hint to help the student progress.
+
+### Response Guidelines ###
+- Offer a concise, educational, and actionable hint.
+- Instead of revealing or describing content from the master solution, focus on guiding the student toward understanding key differences and necessary changes.
+- Instead of saying "It should match the master solution," describe what aspect of the student's implementation needs adjustment.
+- Instead of suggesting to run the code in a browser, direct the student to inspect specific sections of their code for errors or missing logic.
+- The student is not in direct communication with you. Write your hint as if it will be shared with them through an intermediary or another interface.
+
+### Provided Files Format ###
+The student and master solutions are structured as complete HTML documents, with CSS and JavaScript included as inline styles and scripts. The files are processed as follows:
+- **Master Solution:** A fully integrated HTML document.
+- **Student Solution:** A corresponding attempt, structured in the same way.
+- External CSS and JavaScript files referenced in <link> and <script> tags have been inlined into the document.
+
+Below are the provided files:
+`;
 
 export const testSave = async (masterSolution: string, studentSolution: string, type: string) => {
 
@@ -36,7 +60,7 @@ export const testSave = async (masterSolution: string, studentSolution: string, 
 
   let chatResponse: vscode.LanguageModelChatResponse | undefined;
 
-  const files = `\n Master solution: ${masterSolution} \n Student solution: ${studentSolution}`;
+  const files = `\nMaster Solution: ###\n${masterSolution}\n###\nStudent Solution: ###\n${studentSolution}\n###`;
 
   var annotation:string;
   if(type === "hint"){
